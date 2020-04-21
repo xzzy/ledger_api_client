@@ -12,14 +12,9 @@ class Command(BaseCommand):
     help = 'Import ledger groups.'
 
     def handle(self, *args, **options):
-        print ("IMPORT LEDGER GROUP")
+        print ("Using ledgergw "+settings.LEDGERGW_URL+" to determine IP address")
         json_response = {}
-        with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/remote/groups/"+settings.LEDGER_API_KEY+"/") as url:
+        with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/ip-check/") as url:
              json_response = json.loads(url.read().decode())
-
-
-        if models.DataStore.objects.filter(key_name='ledger_groups').count():
-            models.DataStore.objects.filter(key_name='ledger_groups').update(data=json_response)
-        else:
-            models.DataStore.objects.create(key_name='ledger_groups', data=json_response)
+        print (json_response)
 
