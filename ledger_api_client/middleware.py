@@ -12,7 +12,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         User = get_user_model()
-        SESSION_EXPIRY_SSO = 60
+        SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
             SESSION_EXPIRY_SSO = settings.SESSION_EXPIRY_SSO
 
