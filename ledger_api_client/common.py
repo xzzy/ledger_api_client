@@ -9,7 +9,7 @@ def get_ledger_user_info_by_id(userid):
     data = urllib.parse.urlencode(attributemap)
     data = data.encode('utf-8')
     with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/remote/userid/"+userid+"/"+settings.LEDGER_API_KEY+"/", data) as url:
-           json_response = json.loads(url.read().decode())
+           json_response = json.loads(url.read().decode().encode('utf-8'))
     return json_response
 
 
@@ -20,6 +20,6 @@ def search_ledger_users(keyword):
     data = urllib.parse.urlencode(attributemap)
     data = data.encode('utf-8')
     with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/remote/user-search/"+keyword+"/"+settings.LEDGER_API_KEY+"/", data) as url:
-           json_response = json.loads(url.read().decode())
+           json_response = json.loads(url.read().decode().encode('utf-8'))
     return json_response
 
