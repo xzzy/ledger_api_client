@@ -67,4 +67,5 @@ class SSOLoginMiddleware(MiddlewareMixin):
             user.__dict__.update(attributemap)
             user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
+            request.session.set_expiry(30)
             login(request, user)
