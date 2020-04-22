@@ -6,11 +6,13 @@ from django.utils.deprecation import MiddlewareMixin
 import urllib.request, json
 import urllib.parse
 from django.contrib import messages
+from confy import env
 
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         User = get_user_model()
+        SESSION_EXPIRY_SSO = env('SESSION_EXPIRY_SSO',60)
 
         if (request.path.startswith('/logout') or request.path.startswith('/ledger/logout')) \
                     and 'HTTP_X_LOGOUT_URL' in request.META and request.META['HTTP_X_LOGOUT_URL']:
@@ -67,5 +69,5 @@ class SSOLoginMiddleware(MiddlewareMixin):
             user.__dict__.update(attributemap)
             user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
-            request.session.set_expiry(30)
+            request.session.set_expiry(SESSION_EXPIRY_SSO)
             login(request, user)
