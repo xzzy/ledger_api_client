@@ -12,7 +12,9 @@ class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         User = get_user_model()
-        SESSION_EXPIRY_SSO = env('SESSION_EXPIRY_SSO',60)
+        SESSION_EXPIRY_SSO = 60
+        if settings.SESSION_EXPIRY_SSO:
+            SESSION_EXPIRY_SSO = settings.SESSION_EXPIRY_SSO
 
         if (request.path.startswith('/logout') or request.path.startswith('/ledger/logout')) \
                     and 'HTTP_X_LOGOUT_URL' in request.META and request.META['HTTP_X_LOGOUT_URL']:
