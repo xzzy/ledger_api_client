@@ -8,6 +8,6 @@ urlpatterns = [
         url(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
         #url(r'^ledger-api/process-payment$', views.ProcessPaymentCheckout.as_view(), name='ledgergw-process-payment'),
         # api
-        url(r'^api/process-payment', api.process_payment),
+        url(r'^ledger-api/process-payment', api.process_payment),
 
 ]

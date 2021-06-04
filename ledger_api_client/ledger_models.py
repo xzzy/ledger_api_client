@@ -14,9 +14,11 @@ from django_countries.fields import CountryField
 from django.core.files.storage import FileSystemStorage
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Group, Permission
+from django.utils.encoding import python_2_unicode_compatible
 
-
+import zlib
 import decimal
+import requests
 from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
@@ -156,57 +158,76 @@ class BaseAddress(models.Model):
                 self.__dict__[field] = self.__dict__[field].strip()
 
     def save(self, *args, **kwargs):
-        self._update_search_text()
-        self.hash = self.generate_hash()
-        super(BaseAddress, self).save(*args, **kwargs)
+        print ("NO SAVING ADDRESS")
+        #self._update_search_text()
+        #self.hash = self.generate_hash()
+        #super(BaseAddress, self).save(*args, **kwargs)
 
-    def _update_search_text(self):
-        search_fields = filter(
-            bool, [self.line1, self.line2, self.line3, self.locality,
-                   self.state, str(self.country.name), self.postcode])
-        self.search_text = ' '.join(search_fields)
+    #def _update_search_text(self):
+    #    search_fields = filter(
+    #        bool, [self.line1, self.line2, self.line3, self.locality,
+    #               self.state, str(self.country.name), self.postcode])
+    #    self.search_text = ' '.join(search_fields)
 
-    @property
-    def summary(self):
-        """Returns a single string summary of the address, separating fields
-        using commas.
-        """
-        return u', '.join(self.active_address_fields())
-
-
-    # Helper methods
-    def active_address_fields(self):
-        """Return the non-empty components of the address.
-        """
-        fields = [self.line1, self.line2, self.line3,
-                  self.locality, self.state, self.country, self.postcode]
-        #for f in fields:
-        #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
-        #fields = [str(f).strip() for f in fields if f]
-        fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
-
-        return fields
-
-    def join_fields(self, fields, separator=u', '):
-        """Join a sequence of fields using the specified separator.
-        """
-        field_values = []
-        for field in fields:
-            value = getattr(self, field)
-            field_values.append(value)
-        return separator.join(filter(bool, field_values))
-
-    def generate_hash(self):
-        """
-            Returns a hash of the address summary
-        """
-        return zlib.crc32(self.summary.strip().upper().encode('UTF8'))
+    #@property
+    #def summary(self):
+    #    """Returns a single string summary of the address, separating fields
+    #    using commas.
+    #    """
+    #    return u', '.join(self.active_address_fields())
 
 
+    ## Helper methods
+    #def active_address_fields(self):
+    #    """Return the non-empty components of the address.
+    #    """
+    #    fields = [self.line1, self.line2, self.line3,
+    #              self.locality, self.state, self.country, self.postcode]
+    #    #for f in fields:
+    #    #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
+    #    #fields = [str(f).strip() for f in fields if f]
+    #    print ("ENCODIUNG")
+    #    for f in fields:
+    #        print (f)
+    #        if f:
+    #            print (str(f))
+    #    print ("END ")
+    #    #print ([f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f])
+    #    fields = [str(f) for f in fields if f]
+    #    #fields = [f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
+    #    #fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
 
+    #    return fields
+
+    #def join_fields(self, fields, separator=u', '):
+    #    """Join a sequence of fields using the specified separator.
+    #    """
+    #    field_values = []
+    #    for field in fields:
+    #        value = getattr(self, field)
+    #        field_values.append(value)
+    #    return separator.join(filter(bool, field_values))
+
+    #def generate_hash(self):
+    #    """
+    #        Returns a hash of the address summary
+    #    """
+    #    return zlib.crc32(self.summary.strip().upper().encode('UTF8'))
+
+
+#class AddressManager(): 
+#
+#     def create(self):
+#         print ("Address Creation")
+#
+#     def save(self):
+#         print ("SAVE ADDRESS")
+#
 class Address(BaseAddress):
     user = models.ForeignKey('EmailUserRO', related_name='profile_addresses')
     oscar_address = models.ForeignKey(UserAddress, related_name='profile_addresses')
+
+    #objects = AddressManager()
 
     class Meta:
         managed = False
@@ -339,7 +360,7 @@ class PermissionsMixinRO(models.Model):
 class EmailUserROManager(BaseUserManager):
     """A custom Manager for the EmailUser model.
     """
-    use_in_migrations = True
+    use_in_migrations = False 
 
     def _create_user(self, email, password, is_staff, is_superuser, **extra_fields):
         """Creates and saves an EmailUser with the given email and password.
@@ -451,8 +472,18 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
         post_clean.send(sender=self.__class__, instance=self)
 
     def save(self, *args, **kwargs):
-        print ("CAN NOT SAVE - Must send updates via API") 
-        pass
+        print ("Preparing Api call to ledger") 
+        try:
+            url = settings.LEDGER_API_URL+"/ledgergw/remote/user/"+self.email+"/"+settings.LEDGER_API_KEY+"/"
+            saveobj = {
+                    'username': '',
+                    'last_name': self.last_name,
+                    'first_name': self.first_name,
+                    'email': self.email,
+            }
+            resp = requests.post(url, data = saveobj, cookies={})
+        except Exception as e:
+            raise ValidationError('Error: Unable to create user - Issue connecting to ledger gateway')
  
 
     def get_full_name(self):

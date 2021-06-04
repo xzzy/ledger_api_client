@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.conf import settings
 import requests
 import json 
@@ -12,70 +13,61 @@ def create_basket_session(request, emailuser_id, parameters):
     # emailuser_id use to be request vairable.  This has been 
     # replaced with the user objects.  You will need to change 
     #request to request.user.id for this function
-    print ("LOADING create_basket_session")
-    print (emailuser_id)
-    print (parameters)
     payment_session = None
     cookies = None 
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
-    print ("PAYMENT SESSION")
-    print (payment_session)
-    print (parameters)
+
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
-    myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id}
-    print (api_key)
-    print (url)
+    myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id,}
+   
+    try:
+        # send request to server to get file
+        resp = requests.post(url, data = myobj, cookies=cookies)
+    except Exception as e:
+         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')        
 
-    # send request to server to get file
-    resp = requests.post(url, data = myobj, cookies=cookies)
-    print ("COOk1")
-    print (resp)
-    for c in resp.cookies:
-         if c.name ==  'sessionid':
-             print ("CREATING PAYMENT SESSION")
-             request.session['payment_session'] = c.value
-             print (request.session['payment_session'])
-         print(c.name, c.value)
-    request.session['basket_hash'] = resp.json()['data']['basket_hash']
-    return resp.json()['data']['basket_hash']
+    if int(resp.json()['status']) == 200:
+
+         for c in resp.cookies:
+              if c.name ==  'sessionid':
+                  request.session['payment_session'] = c.value
+         request.session['basket_hash'] = resp.json()['data']['basket_hash']
+         return resp.json()['data']['basket_hash']
+    else:
+        raise ValidationError('Error: Unable to create basket session ') 
 
 def create_checkout_session(request, checkout_parameters):
 
-    print ("LOADING create_basket_session")
-    print (checkout_parameters)
+    checkout_parameters['user_logged_in'] = None
+    if request.user.is_authenticated():
+           checkout_parameters['user_logged_in'] = request.user.id
 
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-checkout-session/'+api_key+'/'
     myobj = {'checkout_parameters': json.dumps(checkout_parameters),}
+
     cookies = {}
     if 'payment_session' in request.session:
         payment_session = request.session.get('payment_session')
         cookies = {'sessionid': payment_session}
-    print (api_key)
-    print (url)
-
-    print ("R S")
     session = requests.Session()
-    # send request to server to get file
-    resp = requests.post(url, data = myobj, cookies=cookies)
-    for c in resp.cookies:
-        print(c.name, c.value)
+    try:
+        # send request to server to get file
+        resp = requests.post(url, data = myobj, cookies=cookies)
+    except Exception as e:
+         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')
 
-        if c.name ==  'sessionid':
-             print ("CREATING PAYMENT SESSION")
-             request.session['payment_session'] = c.value
-             print (request.session['payment_session'])
+
+    if int(resp.json()['status']) == 200:
+        for c in resp.cookies:
+            if c.name ==  'sessionid':
+                 request.session['payment_session'] = c.value
+    else:
+        raise ValidationError('Error: Unable to create checkout session ')    
         
-    print ("RS END")
-    print(session.cookies.get_dict())
-
-    #print (resp.json()['data'])
-    #return resp.json()['data']['basket_hash']
-
-
 def payment_details_checkout(request):
     pass
 #/ledger/checkout/checkout/payment-details/
