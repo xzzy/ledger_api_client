@@ -9,7 +9,7 @@ import datetime
 from django.template.loader import render_to_string, get_template
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
 from django.template import loader, Template, Context
 from django.utils.html import strip_tags
 from ledger_api_client.ledger_models import Document

@@ -11,6 +11,7 @@ from confy import env
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
+        print ("MIDDLE WARE")
         User = get_user_model()
         SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
@@ -25,9 +26,9 @@ class SSOLoginMiddleware(MiddlewareMixin):
             user_auth = request.user.is_authenticated()
         else:
             user_auth = request.user.is_authenticated
-
+        print ("AM I AUTH")
+        print (user_auth)
         if not user_auth and 'HTTP_REMOTE_USER' in request.META and request.META['HTTP_REMOTE_USER']:
-
             attributemap = {
                 'username': 'HTTP_REMOTE_USER',
                 'last_name': 'HTTP_X_LAST_NAME',

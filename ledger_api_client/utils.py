@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.conf import settings
+import django
 import requests
 import json 
 
@@ -41,8 +42,15 @@ def create_basket_session(request, emailuser_id, parameters):
 
 def create_checkout_session(request, checkout_parameters):
 
+    django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
+
     checkout_parameters['user_logged_in'] = None
-    if request.user.is_authenticated():
+    is_authen = False
+    if django_version > 1.11:
+          is_authen = request.user.is_authenticated
+    else: 
+          is_authen = request.user.is_authenticated()
+    if is_authen:
            checkout_parameters['user_logged_in'] = request.user.id
 
     api_key = settings.LEDGER_API_KEY

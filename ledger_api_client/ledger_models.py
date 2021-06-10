@@ -14,7 +14,7 @@ from django_countries.fields import CountryField
 from django.core.files.storage import FileSystemStorage
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Group, Permission
-from django.utils.encoding import python_2_unicode_compatible
+#from django.utils.encoding import python_2_unicode_compatible
 
 import zlib
 import decimal
@@ -31,7 +31,9 @@ class LedgerDBRouter(object):
        #print ("TABLE")
        #print (model._meta.db_table)
 
-       if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket':
+       if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket':
+           return 'ledger_db'
+       if model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
            return 'ledger_db'
        #or model._meta.db_table == 'django_admin_log'
        return None
@@ -42,7 +44,7 @@ class LedgerDBRouter(object):
         """
         #print ('DB WRITE')
         #print (model._meta.db_table)
-        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
+        if model._meta.db_table == 'accounts_emailuser': # or model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
            return 'ledger_db'
         return None
 
@@ -50,13 +52,20 @@ class LedgerDBRouter(object):
         """
         Allow relations if a model in the events app is involved.
         """
-        
         #print ("ALLOW RELATION")
         #print (obj1._meta.db_table + ' = ' + obj2._meta.db_table)
-
+        print ("RELATION")
+        print (obj1._meta.db_table)
+        print (obj2._meta.db_table)
         if 'accounts_emailuser' == obj1._meta.db_table and  'parkstay_campgroundgroup_members' == obj2._meta.db_table:
              return True
         if 'accounts_emailuser' == obj1._meta.db_table:
+            return True
+        if 'auth_group' == obj1._meta.db_table:
+            return True
+        if 'auth_permission' == obj1._meta.db_table:
+            return True
+        if 'django_content_type' == obj1._meta.db_table:
             return True
         #db_list = ('ledger_db')
         #if obj1._state.db in db_list and obj2._state.db in db_list: 
@@ -224,8 +233,8 @@ class BaseAddress(models.Model):
 #         print ("SAVE ADDRESS")
 #
 class Address(BaseAddress):
-    user = models.ForeignKey('EmailUserRO', related_name='profile_addresses')
-    oscar_address = models.ForeignKey(UserAddress, related_name='profile_addresses')
+    user = models.ForeignKey('EmailUserRO', related_name='profile_addresses', on_delete=models.DO_NOTHING)
+    oscar_address = models.ForeignKey(UserAddress, related_name='profile_addresses', on_delete=models.DO_NOTHING)
 
     #objects = AddressManager()
 
@@ -239,7 +248,7 @@ class Address(BaseAddress):
 class EmailIdentity(models.Model):
     """Table used for matching access email address with EmailUser.
     """
-    user = models.ForeignKey('EmailUserRO', null=True)
+    user = models.ForeignKey('EmailUserRO', null=True, on_delete=models.DO_NOTHING)
     email = models.EmailField(unique=True)
 
     def __str__(self):
@@ -427,10 +436,10 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
     organisation = models.CharField(max_length=300, null=True, blank=True,
                                     verbose_name="organisation", help_text='organisation, institution or company')
 
-    residential_address = models.ForeignKey(Address, null=True, blank=False, related_name='+')
-    postal_address = models.ForeignKey(Address, null=True, blank=True, related_name='+')
+    residential_address = models.ForeignKey(Address, null=True, blank=False, related_name='+', on_delete=models.DO_NOTHING)
+    postal_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
     postal_same_as_residential = models.NullBooleanField(default=False) 
-    billing_address = models.ForeignKey(Address, null=True, blank=True, related_name='+')
+    billing_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
     billing_same_as_residential = models.NullBooleanField(default=False)
 
     identification = models.ForeignKey(Document, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document')
@@ -482,6 +491,7 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
                     'email': self.email,
             }
             resp = requests.post(url, data = saveobj, cookies={})
+            print (resp)
         except Exception as e:
             raise ValidationError('Error: Unable to create user - Issue connecting to ledger gateway')
  
@@ -576,7 +586,7 @@ class Invoice(models.Model):
     system = models.CharField(max_length=4,blank=True,null=True)
     token = models.CharField(max_length=80,null=True,blank=True)
     voided = models.BooleanField(default=False)
-    previous_invoice = models.ForeignKey('self',null=True,blank=True)
+    previous_invoice = models.ForeignKey('self',null=True,blank=True, on_delete=models.DO_NOTHING)
     settlement_date = models.DateField(blank=True, null=True)
     payment_method = models.SmallIntegerField(choices=PAYMENT_METHOD_CHOICES, default=0)
 

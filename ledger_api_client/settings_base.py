@@ -43,15 +43,21 @@ INSTALLED_APPS = [
     'django_cron',
 ]
 
+PASSWORD_HASHERS = [ 
+            'ledger_api_client.auth_hashers.PBKDF2PasswordHasher',
+            ]
+
+
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'ledger_api_client.middleware.SSOLoginMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    #'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'ledger_api_client.middleware.SSOLoginMiddleware',
+    #'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 # Authentication settings
@@ -155,7 +161,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
-LANGUAGE_CODE = 'en-AU'
+#LANGUAGE_CODE = 'en-AU'
 TIME_ZONE = 'Australia/Perth'
 USE_I18N = True
 USE_L10N = True
@@ -282,4 +288,4 @@ if not PRODUCTION_EMAIL:
 
 PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE=env('PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE','')
 PAYMENT_INTERFACE_SYSTEM_ID=env('PAYMENT_INTERFACE_SYSTEM_ID','')
-SESSION_EXPIRY_SSO = 3600
+SESSION_EXPIRY_SSO = 883600
