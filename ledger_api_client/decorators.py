@@ -8,7 +8,10 @@ else:
     CHECK_TYPES = (type, ClassType)
 import warnings
 
-from oscar.utils.deprecation import RemovedInOscar16Warning
+#from oscar.utils.deprecation import RemovedInOscar16Warning
+class RemovedInOscar16Warning(DeprecationWarning):
+        pass
+
 
 
 def deprecated(obj):
