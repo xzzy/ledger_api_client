@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print ("IMPORT LEDGER GROUP")
         json_response = {}
-        with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/remote/groups/"+settings.LEDGER_API_KEY+"/") as url:
+        with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/groups/"+settings.LEDGER_API_KEY+"/") as url:
              json_response = json.loads(url.read().decode())
 
 

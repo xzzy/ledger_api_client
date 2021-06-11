@@ -58,7 +58,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
             json_response = {}
             data = urllib.parse.urlencode(attributemap)
             data = data.encode('utf-8')
-            with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/remote/user/"+attributemap['email']+"/"+settings.LEDGER_API_KEY+"/", data) as url:
+            with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/user/"+attributemap['email']+"/"+settings.LEDGER_API_KEY+"/", data) as url:
                    json_response = json.loads(url.read().decode())
 
             if 'user' in json_response:

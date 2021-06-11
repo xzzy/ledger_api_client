@@ -12,9 +12,9 @@ class Command(BaseCommand):
     help = 'Import ledger groups.'
 
     def handle(self, *args, **options):
-        print ("Using ledgergw "+settings.LEDGERGW_URL+" to determine IP address")
+        print ("Using ledgergw "+settings.LEDGER_API_URL+" to determine IP address")
         json_response = {}
-        with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/ip-check/") as url:
+        with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/ip-check/") as url:
              json_response = json.loads(url.read().decode())
         print (json_response)
 
