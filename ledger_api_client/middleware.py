@@ -7,6 +7,7 @@ import urllib.request, json
 import urllib.parse
 from django.contrib import messages
 from confy import env
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 
 class SSOLoginMiddleware(MiddlewareMixin):
 
@@ -55,11 +56,19 @@ class SSOLoginMiddleware(MiddlewareMixin):
                 user = User()
 
             # connect to ledger and align local cache account
+
             json_response = {}
-            data = urllib.parse.urlencode(attributemap)
-            data = data.encode('utf-8')
-            with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/user/"+attributemap['email']+"/"+settings.LEDGER_API_KEY+"/", data) as url:
-                   json_response = json.loads(url.read().decode())
+            try:
+                data = urllib.parse.urlencode(attributemap)
+                data = data.encode('utf-8')
+                with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/user/"+attributemap['email']+"/"+settings.LEDGER_API_KEY+"/", data) as url:
+                      json_response = json.loads(url.read().decode())
+            except Exception as e:
+                print ("Error Connecting to Ledger GW")
+                print (e)
+                response = HttpResponse("<h1>Error Connecting to Ledger GW</h1>>")
+                return response
+
 
             if 'user' in json_response:
                 attributemap['ledger_id'] = json_response['user']['ledgerid']
