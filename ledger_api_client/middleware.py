@@ -12,7 +12,7 @@ from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirec
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        print ("MIDDLE WARE")
+        #print ("MIDDLE WARE")
         User = get_user_model()
         SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
@@ -27,8 +27,8 @@ class SSOLoginMiddleware(MiddlewareMixin):
             user_auth = request.user.is_authenticated()
         else:
             user_auth = request.user.is_authenticated
-        print ("AM I AUTH")
-        print (user_auth)
+        #print ("AM I AUTH")
+        #print (user_auth)
         if not user_auth and 'HTTP_REMOTE_USER' in request.META and request.META['HTTP_REMOTE_USER']:
             attributemap = {
                 'username': 'HTTP_REMOTE_USER',
@@ -66,7 +66,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
             except Exception as e:
                 print ("Error Connecting to Ledger GW")
                 print (e)
-                response = HttpResponse("<h1>Error Connecting to Ledger GW</h1>>")
+                response = HttpResponse("<h1>Error Connecting to Ledger GW</h1>")
                 return response
 
 

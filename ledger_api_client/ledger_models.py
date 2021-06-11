@@ -54,9 +54,9 @@ class LedgerDBRouter(object):
         """
         #print ("ALLOW RELATION")
         #print (obj1._meta.db_table + ' = ' + obj2._meta.db_table)
-        print ("RELATION")
-        print (obj1._meta.db_table)
-        print (obj2._meta.db_table)
+        #print ("RELATION")
+        #print (obj1._meta.db_table)
+        #print (obj2._meta.db_table)
         if 'accounts_emailuser' == obj1._meta.db_table and  'parkstay_campgroundgroup_members' == obj2._meta.db_table:
              return True
         if 'accounts_emailuser' == obj1._meta.db_table:
