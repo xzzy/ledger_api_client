@@ -19,6 +19,7 @@ from django.contrib.auth.models import Group, Permission
 import zlib
 import decimal
 import requests
+import json
 from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
@@ -394,6 +395,106 @@ class EmailUserROManager(BaseUserManager):
         return self._create_user(email, password, True, True, **extra_fields)
 
 
+class objects:
+    def filter(**kwargs):
+        
+        return ("YES")
+
+
+
+class GroupObj:
+  def  __init__(self,group_id, group_name):
+       self.id = group_id
+       self.name = group_name
+  
+class GroupQuerySet(object):
+    query_set = []
+    def  __init__(self):
+        pass
+
+    def add(self):
+        self.query_set.append({'test': 'test'})
+
+    def exists(self):
+        return True
+
+    def __call__(self):
+        return self.query_set
+    def __repr__(self):
+        return self.query_set
+
+    def __str(self):
+        return "OBJECT"
+
+
+class GroupsManger:
+
+    def __init__(self,emailuser, **kwargs):
+        self.emailuser_id = emailuser.id
+        self.filtered = self.filtered(self,**kwargs)
+        self.filter = self.filtered.filter
+        self.exists = self.filtered.exists
+        self.all = self.filtered.all
+        
+    #def __call__(self, **kwargs):
+    #    return self
+
+    def all(self):
+        return
+
+    class filtered:
+         action = None
+         exists_checked = False
+         groups_obj = []
+
+         def __iter__(self, **kwargs):
+              return iter(self.groups_obj)
+
+         def __call__(self, **kwargs):
+             return self
+
+         def __init__(self,innerself,**kwargs):
+             self.emailuser_id = innerself.emailuser_id
+
+         def exists(self, **kwargs):
+             return self.exists_checked
+
+         def all(self, **kwargs):
+             try:
+                 url = settings.LEDGER_API_URL+"/ledgergw/remote/user-groups/"+str(self.emailuser_id)+"/"+settings.LEDGER_API_KEY+"/"
+
+                 filter_obj = {}
+                 myobj = {'filter': json.dumps(filter_obj)}
+                 resp = requests.post(url, data = myobj, cookies={})
+                 self.groups_obj = []
+                 for g in resp.json()['groups']['groups']:
+                     g_obj = GroupObj(g['group_id'],g['group_name'])
+                     self.groups_obj.append(g_obj)
+                 self.exists_checked = resp.json()['query_exists']
+             except Exception as e:
+                 raise ValidationError('Error: Unable to create user - Issue connecting to ledger gateway')
+             return self
+
+         def filter(self, **kwargs):
+             try:
+                 url = settings.LEDGER_API_URL+"/ledgergw/remote/user-groups/"+str(self.emailuser_id)+"/"+settings.LEDGER_API_KEY+"/"
+
+                 filter_obj = {} 
+                 for m in kwargs:
+                     filter_obj[m] = kwargs[m]
+
+                 myobj = {'filter': json.dumps(filter_obj)}
+                 resp = requests.post(url, data = myobj, cookies={})
+                 self.groups_obj = []
+                 for g in resp.json()['groups']['groups']:
+                     g_obj = GroupObj(g['group_id'],g['group_name'])
+                     self.groups_obj.append(g_obj)
+                 self.exists_checked = resp.json()['query_exists']
+             except Exception as e:
+                 print (e)
+                 raise ValidationError('Error: Unable to create user - Issue connecting to ledger gateway')
+             return self 
+
 class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
 #class EmailUserRO(AbstractBaseUser):
 
@@ -457,6 +558,7 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
     extra_data = JSONField(default=dict)
 
     objects = EmailUserROManager()
+    #groups = GroupsManger() 
     USERNAME_FIELD = 'email'
 
     class Meta:
@@ -561,7 +663,9 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
         else:
             return -1
 
-EmailUserRO.groups.through._meta.get_field('emailuserro').column='emailuser_id'
+    def groups(self):
+        return GroupsManger(self)  
+#EmailUserRO.groups.through._meta.get_field('emailuserro').column='emailuser_id'
 
 
 
