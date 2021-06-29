@@ -22,7 +22,7 @@ class PaymentDetailCheckout(TemplateView):
 
     def get(self, request, *args, **kwargs):
         # if page is called with ratis_id, inject the ground_id
-        context = {}
+        context = {'settings': settings}
         cookies = {}
         api_key = settings.LEDGER_API_KEY
         url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-details/'
@@ -42,7 +42,7 @@ class PaymentDetailCheckout(TemplateView):
              resp = requests.get(url, data = myobj, cookies=cookies)
              context['data'] = resp.text
         except Exception as e:
-             context['data'] = render_to_string('payments/gateway-error.html', {'error': 'There was an error connecting to the Payment Gateway please try again later',},)             
+            context['data'] = render_to_string('payments/gateway-error.html', {'error': 'There was an error connecting to the Payment Gateway please try again later','settings': settings},)             
              #context['data'] = "There was error connecting to the Payment Gateway please try again later"
         return render(request, self.template_name, context)
 
