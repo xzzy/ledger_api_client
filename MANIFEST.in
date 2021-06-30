@@ -10,6 +10,8 @@ recursive-include ledger_api_client/static/oscar/js/bootstrap3 *.js
 recursive-include ledger_api_client/static/ledger_api/images *.png
 recursive-include ledger_api_client/static/ledger_api/images *.jpg
 recursive-include ledger_api_client/static/ledger_api/images *.gif
+recursive-include ledger_api_client/static/ledger_api/ *.css
+recursive-include ledger_api_client/static/ledger_api/ *.js
 recursive-include ledger_api_client/templates *.html *.txt
 recursive-include ledger_api_client/templates/payments *.html *.txt
 
