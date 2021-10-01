@@ -91,13 +91,22 @@ def use_existing_basket():
 def use_existing_basket_from_invoice():
     pass
 
-
+def get_invoice_properties(invoice_id):
+    print ("G1")
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get-invoice/'+api_key+'/'
+    myobj = {'data': json.dumps({'invoice_id': invoice_id})}
+    cookies = {}
+    resp = requests.post(url, data = myobj, cookies=cookies)
+    print ("G2")
+    #print (resp.text)
+    return resp.json()
 
 class OrderObject():
      def __init__(self):
            self.id = None
            self.number = None
-
+           
 
 class Order:
      class objects:

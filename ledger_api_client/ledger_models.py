@@ -14,6 +14,7 @@ from django_countries.fields import CountryField
 from django.core.files.storage import FileSystemStorage
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Group, Permission
+from ledger_api_client import utils
 #from django.utils.encoding import python_2_unicode_compatible
 
 import zlib
@@ -734,11 +735,16 @@ class Invoice(models.Model):
  
     @property
     def payment_amount(self):
-        return decimal.Decimal(0)
+        invoice_remote = utils.get_invoice_properties(self.id)
+        payment_amount = 0
+        if invoice_remote['status'] == 200:
+            payment_amount = invoice_remote['data']['invoice']['payment_amount']
+        return decimal.Decimal(payment_amount)
 
     # Functions
     # =============================================
     def save(self,*args,**kwargs):
+        print ('Save forbidden')
         pass
 
 
