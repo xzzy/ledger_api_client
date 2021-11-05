@@ -29,9 +29,7 @@ def create_basket_session(request, emailuser_id, parameters):
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
          raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')        
-
     if int(resp.json()['status']) == 200:
-
          for c in resp.cookies:
               if c.name ==  'sessionid':
                   request.session['payment_session'] = c.value
@@ -92,15 +90,18 @@ def use_existing_basket_from_invoice():
     pass
 
 def get_invoice_properties(invoice_id):
-    print ("G1")
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/get-invoice/'+api_key+'/'
     myobj = {'data': json.dumps({'invoice_id': invoice_id})}
     cookies = {}
     resp = requests.post(url, data = myobj, cookies=cookies)
-    print ("G2")
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
     #print (resp.text)
-    return resp.json()
+    return resp_json 
 
 class OrderObject():
      def __init__(self):
@@ -118,8 +119,6 @@ class Order:
              session = requests.Session()
              # send request to server to get file
              resp = requests.post(url, data = myobj, cookies=cookies)
-             print (resp)            
-             print (resp.text)
              o = OrderObject()
              o.id = resp.json()['data']['order']['id']
              o.number = resp.json()['data']['order']['number']

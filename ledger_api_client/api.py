@@ -35,14 +35,12 @@ def process_payment(request):
         else:
             myobj[post_field] = request.POST[post_field]
 
-    print ("SETTING CARD")
     resp = ""
     try:
         # Set payment method first to card
         resp = requests.post(url, data = myobj, cookies=cookies)
 
         # now process payment
-        print ("PLACING ORDER")
         myobj['action'] = 'place_order'
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
