@@ -50,7 +50,7 @@ def create_checkout_session(request, checkout_parameters):
           is_authen = request.user.is_authenticated()
     if is_authen:
            checkout_parameters['user_logged_in'] = request.user.id
-
+    print ("create_checkout_session u")
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-checkout-session/'+api_key+'/'
     myobj = {'checkout_parameters': json.dumps(checkout_parameters),}
@@ -102,6 +102,23 @@ def get_invoice_properties(invoice_id):
         resp_json = {}
     #print (resp.text)
     return resp_json 
+
+def get_basket_total(basket_id):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get-basket-total/'+api_key+'/'
+    myobj = {'data': json.dumps({'basket_id': basket_id})}
+    cookies = {}
+    resp = requests.post(url, data = myobj, cookies=cookies)
+    resp_json = {}
+    print (resp.text)
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+
+
 
 class OrderObject():
      def __init__(self):

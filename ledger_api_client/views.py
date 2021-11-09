@@ -9,6 +9,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from ledger_api_client import ledger_models
+from ledger_api_client import utils as ledger_api_client_utils
 from django import forms
 from datetime import datetime, timedelta
 #from django.template import Template, Context,RequestContext
@@ -25,13 +27,25 @@ class PaymentDetailCheckout(TemplateView):
         context = {'settings': settings}
         cookies = {}
         api_key = settings.LEDGER_API_KEY
-        url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-details/'
+        url = None
+        payment_total = Decimal('0.00')
         payment_session = None
         basket_hash = ""
 
         if 'payment_session' in request.session:
               payment_session = request.session.get('payment_session')
               basket_hash = request.session.get('basket_hash')
+              basket_hash_split = basket_hash.split("|")
+
+              basket_totals = ledger_api_client_utils.get_basket_total(basket_hash_split[0])
+              if 'data' in basket_totals:
+                  if 'basket_total' in basket_totals['data']:
+                        payment_total = Decimal(basket_totals['data']['basket_total'])
+
+
+              #print (basket_hash_split[0])
+              #print (ledger_api_client_utils.Order.objects.get(basket_id=basket_hash_split[0]))
+
               cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key}
 
         myobj = {'payment_method':'card',}
@@ -39,6 +53,13 @@ class PaymentDetailCheckout(TemplateView):
         # send request to server to get file
         # allow_redirects=False
         try: 
+             if payment_total > 0:
+                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-details/'
+             elif payment_total < 0:
+                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-refund/'
+             elif payment_total == 0:
+                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-zero/'
+             
              resp = requests.get(url, data = myobj, cookies=cookies)
              context['data'] = resp.text
         except Exception as e:
