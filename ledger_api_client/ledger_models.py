@@ -737,8 +737,9 @@ class Invoice(models.Model):
     def payment_amount(self):
         invoice_remote = utils.get_invoice_properties(self.id)
         payment_amount = 0
-        if invoice_remote['status'] == 200:
-            payment_amount = invoice_remote['data']['invoice']['payment_amount']
+        if 'status' in invoice_remote:
+           if invoice_remote['status'] == 200:
+               payment_amount = invoice_remote['data']['invoice']['payment_amount']
         return decimal.Decimal(payment_amount)
 
     # Functions
