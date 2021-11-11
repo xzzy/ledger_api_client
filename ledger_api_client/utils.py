@@ -28,7 +28,9 @@ def create_basket_session(request, emailuser_id, parameters):
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
-         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')        
+         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')       
+    print ("EXCEPT")
+    print (resp.text)
     if int(resp.json()['status']) == 200:
          for c in resp.cookies:
               if c.name ==  'sessionid':
@@ -50,7 +52,6 @@ def create_checkout_session(request, checkout_parameters):
           is_authen = request.user.is_authenticated()
     if is_authen:
            checkout_parameters['user_logged_in'] = request.user.id
-    print ("create_checkout_session u")
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-checkout-session/'+api_key+'/'
     myobj = {'checkout_parameters': json.dumps(checkout_parameters),}
@@ -72,8 +73,42 @@ def create_checkout_session(request, checkout_parameters):
             if c.name ==  'sessionid':
                  request.session['payment_session'] = c.value
     else:
-        raise ValidationError('Error: Unable to create checkout session ')    
-        
+        raise ValidationError('Error: Unable to create checkout session')    
+
+def process_api_refund(request, basket_parameters, customer_id, return_url, return_preload_url):
+    django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/process-api-refund/'+api_key+'/'
+    cookies = {}
+
+    user_logged_in = None
+    if django_version > 1.11:
+          is_authen = request.user.is_authenticated
+    else:
+          is_authen = request.user.is_authenticated()
+    if is_authen:
+           user_logged_in = request.user.id
+
+
+    myobj = {'basket_parameters': json.dumps(basket_parameters),'customer_id': customer_id, 'return_url': return_url, 'return_preload_url': return_preload_url, 'user_logged_in': user_logged_in }
+
+    try:
+        # send request to server to get file
+        resp = requests.post(url, data = myobj, cookies=cookies)
+    except Exception as e:
+         raise ValidationError('Error: trying to process refund.')
+    if int(resp.json()['status']) == 200:
+        try:
+           return resp.json()
+        except Exception as e:
+           print ("exception on url")
+           print (e)
+           return {"status": 501, "message": "error processing refund"}
+    else:
+        raise ValidationError('Error: Unable to create checkout session ')
+
+
+
 def payment_details_checkout(request):
     pass
 #/ledger/checkout/checkout/payment-details/
