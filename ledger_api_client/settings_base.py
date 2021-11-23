@@ -16,6 +16,7 @@ PROJECT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 LEDGER_API_KEY=env('LEDGER_API_KEY',"NO_KEY_PROVIDED")
 LEDGERGW_URL=env('LEDGERGW_URL','http://localhost/')
 LEDGER_API_URL=env('LEDGER_API_URL','http://localhost/')
+LEDGER_UI_URL=env('LEDGER_UI_URL','http://localhost/')
 
 # Application definitions
 SECRET_KEY = env('SECRET_KEY')
