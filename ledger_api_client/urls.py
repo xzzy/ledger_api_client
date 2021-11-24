@@ -10,5 +10,6 @@ urlpatterns = [
         # api
         url(r'^ledger-api/process-payment', api.process_payment),
         url(r'^ledger-api/process-refund', api.process_refund),
+        url(r'^ledger-api/process-zero', api.process_zero),
 
 ]
