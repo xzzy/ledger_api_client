@@ -11,7 +11,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0011_update_proxy_permissions'),
+        #('auth', '0011_update_proxy_permissions'),
+        #('auth', '0007_alter_validators_add_error_messages'),
     ]
 
     operations = [

@@ -7,10 +7,12 @@ import urllib.request, json
 import urllib.parse
 from django.contrib import messages
 from confy import env
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
+        #print ("MIDDLE WARE")
         User = get_user_model()
         SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
@@ -25,9 +27,9 @@ class SSOLoginMiddleware(MiddlewareMixin):
             user_auth = request.user.is_authenticated()
         else:
             user_auth = request.user.is_authenticated
-
+        #print ("AM I AUTH")
+        #print (user_auth)
         if not user_auth and 'HTTP_REMOTE_USER' in request.META and request.META['HTTP_REMOTE_USER']:
-
             attributemap = {
                 'username': 'HTTP_REMOTE_USER',
                 'last_name': 'HTTP_X_LAST_NAME',
@@ -54,11 +56,19 @@ class SSOLoginMiddleware(MiddlewareMixin):
                 user = User()
 
             # connect to ledger and align local cache account
+
             json_response = {}
-            data = urllib.parse.urlencode(attributemap)
-            data = data.encode('utf-8')
-            with urllib.request.urlopen(settings.LEDGERGW_URL+"ledgergw/remote/user/"+attributemap['email']+"/"+settings.LEDGER_API_KEY+"/", data) as url:
-                   json_response = json.loads(url.read().decode())
+            try:
+                data = urllib.parse.urlencode(attributemap)
+                data = data.encode('utf-8')
+                with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/user/"+attributemap['email']+"/"+settings.LEDGER_API_KEY+"/", data) as url:
+                      json_response = json.loads(url.read().decode())
+            except Exception as e:
+                print ("Error Connecting to Ledger GW")
+                print (e)
+                response = HttpResponse("<h1>Error Connecting to Ledger GW</h1>")
+                return response
+
 
             if 'user' in json_response:
                 attributemap['ledger_id'] = json_response['user']['ledgerid']
