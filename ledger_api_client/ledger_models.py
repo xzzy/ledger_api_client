@@ -74,6 +74,17 @@ class LedgerDBRouter(object):
         #    return True        
         return None
 
+
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
+        """
+        Make sure the auth app only appears in the 'other_db'  
+        database.
+        """
+        
+        #if app_label == '':
+        #    return db == 'other_db'  
+        return 'default'
+
 class Document(models.Model):
     name = models.CharField(max_length=100, blank=True,
                             verbose_name='name', help_text='')
@@ -787,4 +798,32 @@ class Basket(models.Model):
        managed = False
        db_table = 'basket_basket'
 
+
+class RevisionedMixin(models.Model):
+    """
+    A model tracked by reversion through the save method.
+    """
+    def save(self, **kwargs):
+        if kwargs.pop('no_revision', False):
+            super(RevisionedMixin, self).save(**kwargs)
+        else:
+            with revisions.create_revision():
+                if 'version_user' in kwargs:
+                    revisions.set_user(kwargs.pop('version_user', None))
+                if 'version_comment' in kwargs:
+                    revisions.set_comment(kwargs.pop('version_comment', ''))
+                super(RevisionedMixin, self).save(**kwargs)
+
+    @property
+    def created_date(self):
+        #return revisions.get_for_object(self).last().revision.date_created
+        return Version.objects.get_for_object(self).last().revision.date_created
+
+    @property
+    def modified_date(self):
+        #return revisions.get_for_object(self).first().revision.date_created
+        return Version.objects.get_for_object(self).first().revision.date_created
+
+    class Meta:
+        abstract = True
 
