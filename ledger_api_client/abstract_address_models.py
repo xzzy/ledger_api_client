@@ -6,8 +6,9 @@ from django.core import exceptions
 from django.db import models
 #from django.utils.encoding import python_2_unicode_compatible
 from django.utils.six.moves import filter
-from django.utils.translation import ugettext_lazy as _
+#from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
+from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 
 from django.conf import settings 
