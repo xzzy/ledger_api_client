@@ -26,7 +26,20 @@ class SSOLoginMiddleware(MiddlewareMixin):
         if VERSION < (2, 0):
             user_auth = request.user.is_authenticated()
         else:
-            user_auth = request.user.is_authenticated
+            try:
+                user_auth = request.user.is_authenticated
+                if user_auth is True:
+                     if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
+                         response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
+                         response.delete_cookie('sessionid')
+                         return response
+            except:
+                print ("user_auth request user does not exist")
+                response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
+                response.delete_cookie('sessionid')
+                return response
+
+
         #print ("AM I AUTH")
         #print (user_auth)
         if not user_auth and 'HTTP_REMOTE_USER' in request.META and request.META['HTTP_REMOTE_USER']:
@@ -48,10 +61,10 @@ class SSOLoginMiddleware(MiddlewareMixin):
                 if not any([attributemap['email'].lower().endswith(x) for x in allowed]):
                     return http.HttpResponseForbidden()
 
+            exists_in_ledger = False
             if attributemap['email'] and User.objects.filter(email__iexact=attributemap['email']).exists():
                 user = User.objects.filter(email__iexact=attributemap['email'])[0]
-            elif (User.__name__ != 'EmailUser') and User.objects.filter(username__iexact=attributemap['username']).exists():
-                user = User.objects.filter(username__iexact=attributemap['username'])[0]
+                exists_in_ledger = True
             else:
                 user = User()
 
@@ -80,6 +93,12 @@ class SSOLoginMiddleware(MiddlewareMixin):
                 messages.error(request, 'Unable to Update User Information from Ledger')
             user.__dict__.update(attributemap)
             user.save()
+
+            if exists_in_ledger is False:
+                response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
+                response.delete_cookie('sessionid')
+                return response
+
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             request.session.set_expiry(SESSION_EXPIRY_SSO)
             login(request, user)
