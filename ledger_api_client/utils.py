@@ -29,8 +29,6 @@ def create_basket_session(request, emailuser_id, parameters):
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
          raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')       
-    print ("EXCEPT")
-    print (resp.text)
     if int(resp.json()['status']) == 200:
          for c in resp.cookies:
               if c.name ==  'sessionid':
@@ -87,10 +85,9 @@ def process_api_refund(request, basket_parameters, customer_id, return_url, retu
     else:
           is_authen = request.user.is_authenticated()
     if is_authen:
-           user_logged_in = request.user.id
+          user_logged_in = request.user.id
 
-
-    myobj = {'basket_parameters': json.dumps(basket_parameters),'customer_id': customer_id, 'return_url': return_url, 'return_preload_url': return_preload_url, 'user_logged_in': user_logged_in }
+    myobj = {'basket_parameters': json.dumps(basket_parameters),'customer_id': customer_id, 'return_url': return_url, 'return_preload_url': return_preload_url, 'user_logged_in': user_logged_in}
 
     try:
         # send request to server to get file
