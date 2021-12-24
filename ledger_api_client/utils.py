@@ -164,6 +164,7 @@ class OrderObject():
      def __init__(self):
            self.id = None
            self.number = None
+           self.user_id = None
            
 
 class Order:
@@ -176,8 +177,10 @@ class Order:
              session = requests.Session()
              # send request to server to get file
              resp = requests.post(url, data = myobj, cookies=cookies)
+             print (resp)
              o = OrderObject()
              o.id = resp.json()['data']['order']['id']
              o.number = resp.json()['data']['order']['number']
-
+             o.user_id = resp.json()['data']['order']['user_id']
+             
              return o 

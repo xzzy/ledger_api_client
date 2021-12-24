@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from ledger_api_client import views
 from ledger_api_client import api
 
+
 urlpatterns = [
         url(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
         #url(r'^ledger-api/process-payment$', views.ProcessPaymentCheckout.as_view(), name='ledgergw-process-payment'),
@@ -13,5 +14,5 @@ urlpatterns = [
         url(r'^ledger-api/process-payment', api.process_payment),
         url(r'^ledger-api/process-refund', api.process_refund),
         url(r'^ledger-api/process-zero', api.process_zero),
-
+        url(r'^ledger-toolkit-api/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='ledger-api-invoice-pdf'),
 ]

@@ -13,6 +13,8 @@ else:
    BASE_DIR = BASE_DIR_ENV
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ledger')
 
+PAYMENT_OFFICERS_GROUP = env('PAYMENT_OFFICERS_GROUP','Payments Officers')
+
 LEDGER_API_KEY=env('LEDGER_API_KEY',"NO_KEY_PROVIDED")
 LEDGERGW_URL=env('LEDGERGW_URL','http://localhost/')
 LEDGER_API_URL=env('LEDGER_API_URL','http://localhost/')
