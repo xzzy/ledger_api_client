@@ -16,6 +16,7 @@ def create_basket_session(request, emailuser_id, parameters):
     #request to request.user.id for this function
     payment_session = None
     cookies = None 
+ 
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
@@ -23,14 +24,12 @@ def create_basket_session(request, emailuser_id, parameters):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
     myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id,}
-   
+
     try:
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
          raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')       
-    print ("EXCEPT")
-    print (resp.text)
     if int(resp.json()['status']) == 200:
          for c in resp.cookies:
               if c.name ==  'sessionid':
@@ -55,6 +54,13 @@ def create_checkout_session(request, checkout_parameters):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-checkout-session/'+api_key+'/'
     myobj = {'checkout_parameters': json.dumps(checkout_parameters),}
+
+    if 'basket_owner' in checkout_parameters:
+        pass
+    else:
+        raise ValidationError('Error: "basket_owner" does not exist in create_checkout_session, this must have matching email user id')
+          
+
 
     cookies = {}
     if 'payment_session' in request.session:
@@ -87,10 +93,9 @@ def process_api_refund(request, basket_parameters, customer_id, return_url, retu
     else:
           is_authen = request.user.is_authenticated()
     if is_authen:
-           user_logged_in = request.user.id
+          user_logged_in = request.user.id
 
-
-    myobj = {'basket_parameters': json.dumps(basket_parameters),'customer_id': customer_id, 'return_url': return_url, 'return_preload_url': return_preload_url, 'user_logged_in': user_logged_in }
+    myobj = {'basket_parameters': json.dumps(basket_parameters),'customer_id': customer_id, 'return_url': return_url, 'return_preload_url': return_preload_url, 'user_logged_in': user_logged_in}
 
     try:
         # send request to server to get file
