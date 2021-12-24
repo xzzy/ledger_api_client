@@ -738,6 +738,17 @@ class Invoice(models.Model):
         return self.order.num_items
 
     @property
+    def owner(self):
+        user = None
+        order = utils.Order.objects.get(number=self.order_number)
+        if order:
+            if order.user_id:
+               user= EmailUserRO.objects.filter(id=order.user_id)
+               if user.count() > 0:
+                   return user[0]
+        return None
+
+    @property
     def balance(self):
         if self.voided:
             return decimal.Decimal(0)

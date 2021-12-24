@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from ledger_api_client import ledger_models
 from ledger_api_client import utils as ledger_api_client_utils
+from ledger_api_client.mixins import InvoiceOwnerMixin
 from django import forms
 from datetime import datetime, timedelta
 #from django.template import Template, Context,RequestContext
@@ -18,6 +19,13 @@ from datetime import datetime, timedelta
 from django.template.loader import render_to_string
 from decimal import *
 import requests
+
+from django.views import generic
+#from ledger.payments.pdf import create_invoice_pdf_bytes
+#from ledger.payments.models import Invoice
+#from ledger.payments.mixins import InvoiceOwnerMixin
+
+
 
 class PaymentDetailCheckout(TemplateView):
     template_name = 'payments/payment-details.html'
@@ -66,6 +74,20 @@ class PaymentDetailCheckout(TemplateView):
             context['data'] = render_to_string('payments/gateway-error.html', {'error': 'There was an error connecting to the Payment Gateway please try again later','settings': settings},)             
              #context['data'] = "There was error connecting to the Payment Gateway please try again later"
         return render(request, self.template_name, context)
+
+
+class InvoicePDFView(InvoiceOwnerMixin, generic.View):
+    def get(self, request, *args, **kwargs):
+        api_key = settings.LEDGER_API_KEY
+        url = settings.LEDGER_API_URL+'/ledgergw/invoice-pdf/'+api_key+'/'+self.kwargs['reference']
+        invoice_pdf = requests.get(url=url)
+        response = HttpResponse(invoice_pdf.content, content_type='application/pdf')
+        return response
+
+    def get_object(self):
+        invoice = get_object_or_404(ledger_models.Invoice, reference=self.kwargs['reference'])
+        return invoice
+
 
 #class ProcessPaymentCheckout(TemplateView):
 #    template_name = 'payments/payment-details.html'
