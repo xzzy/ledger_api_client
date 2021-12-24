@@ -16,6 +16,7 @@ def create_basket_session(request, emailuser_id, parameters):
     #request to request.user.id for this function
     payment_session = None
     cookies = None 
+ 
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
@@ -23,7 +24,7 @@ def create_basket_session(request, emailuser_id, parameters):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
     myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id,}
-   
+
     try:
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
@@ -53,6 +54,13 @@ def create_checkout_session(request, checkout_parameters):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-checkout-session/'+api_key+'/'
     myobj = {'checkout_parameters': json.dumps(checkout_parameters),}
+
+    if 'basket_owner' in checkout_parameters:
+        pass
+    else:
+        raise ValidationError('Error: "basket_owner" does not exist in create_checkout_session, this must have matching email user id')
+          
+
 
     cookies = {}
     if 'payment_session' in request.session:
