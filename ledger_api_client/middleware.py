@@ -14,6 +14,10 @@ class SSOLoginMiddleware(MiddlewareMixin):
     def process_request(self, request):
         #print ("MIDDLE WARE")
         User = get_user_model()
+        ENABLE_DJANGO_LOGIN=settings.ENABLE_DJANGO_LOGIN
+        print ("ENABLE_DJANGO_LOGIN")
+        print (ENABLE_DJANGO_LOGIN)
+
         SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
             SESSION_EXPIRY_SSO = settings.SESSION_EXPIRY_SSO
@@ -29,10 +33,17 @@ class SSOLoginMiddleware(MiddlewareMixin):
             try:
                 user_auth = request.user.is_authenticated
                 if user_auth is True:
-                     if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
-                         response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
-                         response.delete_cookie('sessionid')
-                         return response
+
+                     if ENABLE_DJANGO_LOGIN is True:
+                         if 'HTTP_REMOTE_USER' in request.META:
+                              if  len(request.META['HTTP_REMOTE_USER']) > 3:
+                                    response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Error: ENABLE_DJANGO_LOGIN with SSO enabled.  Please turn off ENABLE_DJANGO_LOGIN with SSO.</h1><br></center><script></script>")
+                                    return response 
+                     else:
+                         if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
+                             response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
+                             response.delete_cookie('sessionid')
+                             return response
             except:
                 print ("user_auth request user does not exist")
                 response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
