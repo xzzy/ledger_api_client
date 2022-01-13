@@ -38,7 +38,6 @@ class SSOLoginMiddleware(MiddlewareMixin):
                                     return response 
                      else:
                          pass
-                         print ("ELSE")
                          if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
                              response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
                              response.delete_cookie('sessionid')
