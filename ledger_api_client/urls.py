@@ -24,6 +24,9 @@ urlpatterns = [
 ]
 if settings.ENABLE_DJANGO_LOGIN is True:
     urlpatterns.append(url(r'^login/', LoginView.as_view(),name='login'))
+    # this is entirely for the purpose to help with development and should not be enabled in production
+    urlpatterns.append(url(r'^ssologin/', LoginView.as_view(),name='ssologin'))
+
 urlpatterns.append(url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'))
 
 
