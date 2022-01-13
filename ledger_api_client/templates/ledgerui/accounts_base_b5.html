@@ -1,0 +1,132 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+
+{% block header_top_menu %}
+AQUI
+<div id='ledger-payment-overtop'></div>
+{% endblock %}
+
+{% block extra_css %}
+ <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
+{% endblock %}
+
+
+{% block  top_menu %}
+<li>
+         <button type="button" class="btn btn-sm btn-secondary">
+                  Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+
+</li>
+
+<li>
+         <button type="button" class="btn btn-sm btn-secondary">
+                  Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+
+</li>
+
+<li>
+         <button type="button" class="btn btn-sm btn-secondary">
+                  Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+
+</li>
+
+{% endblock %}
+
+
+{% block menubottom %}
+{%endblock %}
+
+{% block menu_items_left_brand %}
+   <a class="navbar-brand" href="#"><img src="/static/img/pwl_icon.png">Home</a>
+   <a href=''></a>
+{%endblock %}
+
+
+
+{% block menu_items_left %}
+
+            {% if request.user.is_staff %}
+            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-campgrounds'%}">Campgrounds</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-campsite-types'%}">Camp Site Types</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-bulkpricing'%}">Bulk Pricing</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-bookings'%}">Existing Bookings</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{% url 'search_availablity_information'%}">Search for a place to stay</a></li>
+            <li class="nav-item"><a class="nav-link active" href="/map/">Map</a></li>
+            {% else %}
+            <li class="nav-item"><a class="nav-link active" href="{% url 'search_availablity_information'%}">Search for a place to stay</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{{EXPLORE_PARKS_SEARCH}}">Search for a place to stay</a></li>
+            {% endif %}
+
+
+{%endblock %}
+
+{% block menu_extra_dropdown_staff_top %}
+     <li><a  class="dropdown-item" href="/dashboard/reports">Reports</a></li>
+{% endblock %}         
+
+{% block menu_extra_dropdown_bottom %}
+<li><a  class="dropdown-item" href="{% url 'account' %}">Manage Account</a></li>
+{% endblock %}
+
+
+
+
+
+
+
+{% block extra_style %}
+<style>
+    .footer {background-color: lightgrey}
+</style>
+{% endblock %}
+
+{% block menu_spacer %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="">
+
+        <!-- Messages  -->
+        {% if messages %}
+        <div class="row">
+            <div class="col">
+                {% for message in messages %}
+                <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+                    {{ message|safe }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+	<div class="col-lg-12">
+
+		<div id='content-payment-body'>
+			{{ data|safe }}
+		</div>
+	</div>
+
+
+
+        <div class="row">
+            <div class="col">
+                {% block page_content_inner %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_footer %}
+<footer class="footer mt-auto py-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <small class="float-right">&copy; Department of Biodiversity, Conservation and Attractions</small>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock page_footer %}

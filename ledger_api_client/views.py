@@ -76,6 +76,13 @@ class PaymentDetailCheckout(TemplateView):
         return render(request, self.template_name, context)
 
 
+class AccountsView(TemplateView):
+
+    template_name = 'ledgerui/accounts.html'
+    def get(self, request, *args, **kwargs):
+        context = {'settings': settings}
+        return render(request, self.template_name, context)
+
 class InvoicePDFView(InvoiceOwnerMixin, generic.View):
     def get(self, request, *args, **kwargs):
         api_key = settings.LEDGER_API_KEY

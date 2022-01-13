@@ -12,11 +12,8 @@ from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirec
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        #print ("MIDDLE WARE")
         User = get_user_model()
         ENABLE_DJANGO_LOGIN=settings.ENABLE_DJANGO_LOGIN
-        print ("ENABLE_DJANGO_LOGIN")
-        print (ENABLE_DJANGO_LOGIN)
 
         SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
@@ -33,13 +30,15 @@ class SSOLoginMiddleware(MiddlewareMixin):
             try:
                 user_auth = request.user.is_authenticated
                 if user_auth is True:
-
+                     pass
                      if ENABLE_DJANGO_LOGIN is True:
                          if 'HTTP_REMOTE_USER' in request.META:
-                              if  len(request.META['HTTP_REMOTE_USER']) > 3:
-                                    response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Error: ENABLE_DJANGO_LOGIN with SSO enabled.  Please turn off ENABLE_DJANGO_LOGIN with SSO.</h1><br></center><script></script>")
+                              if len(request.META['HTTP_REMOTE_USER']) > 3:
+                                    response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Error: SSO detected as enabled.  ENABLE_DJANGO_LOGIN should be set to False when sso is enabled.</h1><br></center><script></script>")
                                     return response 
                      else:
+                         pass
+                         print ("ELSE")
                          if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
                              response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
                              response.delete_cookie('sessionid')
