@@ -17,10 +17,8 @@ urlpatterns = [
         url(r'^ledger-api/process-payment', api.process_payment),
         url(r'^ledger-api/process-refund', api.process_refund),
         url(r'^ledger-api/process-zero', api.process_zero),
-        url(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='ledger-api-invoice-pdf'),
+        url(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
         url(r'^ledger-toolkit-api/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='ledger-api-invoice-pdf'),
-
-
 ]
 if settings.ENABLE_DJANGO_LOGIN is True:
     urlpatterns.append(url(r'^login/', LoginView.as_view(),name='login'))

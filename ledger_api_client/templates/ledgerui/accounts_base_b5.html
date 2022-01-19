@@ -1,15 +1,12 @@
 {% extends "webtemplate_dbca/base_b5.html" %}
 
-
 {% block header_top_menu %}
-AQUI
 <div id='ledger-payment-overtop'></div>
 {% endblock %}
 
 {% block extra_css %}
  <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
 {% endblock %}
-
 
 {% block  top_menu %}
 <li>
@@ -39,41 +36,6 @@ AQUI
 {% block menubottom %}
 {%endblock %}
 
-{% block menu_items_left_brand %}
-   <a class="navbar-brand" href="#"><img src="/static/img/pwl_icon.png">Home</a>
-   <a href=''></a>
-{%endblock %}
-
-
-
-{% block menu_items_left %}
-
-            {% if request.user.is_staff %}
-            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-campgrounds'%}">Campgrounds</a></li>
-            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-campsite-types'%}">Camp Site Types</a></li>
-            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-bulkpricing'%}">Bulk Pricing</a></li>
-            <li class="nav-item"><a class="nav-link active" href="{% url 'dash-bookings'%}">Existing Bookings</a></li>
-            <li class="nav-item"><a class="nav-link active" href="{% url 'search_availablity_information'%}">Search for a place to stay</a></li>
-            <li class="nav-item"><a class="nav-link active" href="/map/">Map</a></li>
-            {% else %}
-            <li class="nav-item"><a class="nav-link active" href="{% url 'search_availablity_information'%}">Search for a place to stay</a></li>
-            <li class="nav-item"><a class="nav-link active" href="{{EXPLORE_PARKS_SEARCH}}">Search for a place to stay</a></li>
-            {% endif %}
-
-
-{%endblock %}
-
-{% block menu_extra_dropdown_staff_top %}
-     <li><a  class="dropdown-item" href="/dashboard/reports">Reports</a></li>
-{% endblock %}         
-
-{% block menu_extra_dropdown_bottom %}
-<li><a  class="dropdown-item" href="{% url 'account' %}">Manage Account</a></li>
-{% endblock %}
-
-
-
-
 
 
 
@@ -88,6 +50,7 @@ AQUI
 
 
 {% block content %}
+    THIS IS ACCOUNTS
     <div class="">
 
         <!-- Messages  -->
