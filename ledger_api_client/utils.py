@@ -21,6 +21,11 @@ def create_basket_session(request, emailuser_id, parameters):
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
+    no_payment = False
+    no_payment_hash = ''
+    if 'no_payment' in parameters:
+        no_payment = parameters['no_payment']
+        no_payment_hash = str(no_payment)+"|"+payment_session
 
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
@@ -30,12 +35,17 @@ def create_basket_session(request, emailuser_id, parameters):
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
-         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')       
+         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')
+
     if int(resp.json()['status']) == 200:
          for c in resp.cookies:
               if c.name ==  'sessionid':
                   request.session['payment_session'] = c.value
+
+                   
          request.session['basket_hash'] = resp.json()['data']['basket_hash']
+         request.session['no_payment_hash'] = no_payment_hash
+
          return resp.json()['data']['basket_hash']
     else:
         raise ValidationError('Error: Unable to create basket session ') 
