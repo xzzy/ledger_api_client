@@ -17,6 +17,7 @@ urlpatterns = [
         url(r'^ledger-api/process-payment', api.process_payment),
         url(r'^ledger-api/process-refund', api.process_refund),
         url(r'^ledger-api/process-zero', api.process_zero),
+        url(r'^ledger-api/process-no', api.process_no),
         url(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
         url(r'^ledger-toolkit-api/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='ledger-api-invoice-pdf'),
 ]
