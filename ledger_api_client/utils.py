@@ -27,7 +27,7 @@ def create_basket_session(request, emailuser_id, parameters):
         no_payment = parameters['no_payment']
         if no_payment is None:
             no_payment = False
-        no_payment_hash = str(no_payment)+"|"+payment_session
+        no_payment_hash = str(no_payment)+"|"+str(payment_session)
 
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
