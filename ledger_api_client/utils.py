@@ -23,11 +23,6 @@ def create_basket_session(request, emailuser_id, parameters):
           cookies = {'sessionid': payment_session}
     no_payment = False
     no_payment_hash = ''
-    if 'no_payment' in parameters:
-        no_payment = parameters['no_payment']
-        if no_payment is None:
-            no_payment = False
-        no_payment_hash = str(no_payment)+"|"+str(payment_session)
 
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
@@ -43,8 +38,16 @@ def create_basket_session(request, emailuser_id, parameters):
          for c in resp.cookies:
               if c.name ==  'sessionid':
                   request.session['payment_session'] = c.value
+                  payment_session = request.session.get('payment_session')
 
-                   
+         if 'no_payment' in parameters:
+             no_payment = parameters['no_payment']
+             if no_payment is None:
+                 no_payment = False
+             no_payment_hash = str(no_payment)+"|"+str(payment_session)
+
+       
+
          request.session['basket_hash'] = resp.json()['data']['basket_hash']
          request.session['no_payment_hash'] = no_payment_hash
 
