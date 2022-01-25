@@ -1,5 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from confy import env, database
+import sys
 import dj_database_url
 import os
 
@@ -124,23 +125,35 @@ HAYSTACK_CONNECTIONS = {
 }
 
 
-# Database
-DATABASES = {
-    # Defined in the DATABASE_URL env variable.
-    'default': database.config(),
-}
+## Database
+#DATABASES = {
+#    # Defined in the DATABASE_URL env variable.
+#    'default': database.config(),
+#}
 
 #DATABASE_ROUTERS = ['ledger.payments.models.OracleFinanceDBRouter']
 DATABASE_ROUTERS = ['ledger_api_client.ledger_models.LedgerDBRouter',]
-DATABASE_APPS_MAPPING = {'ledger_db': 'ledger_db', }
+DATABASE_APPS_MAPPING = {
+    'contenttypes': 'default',
+    'auth': 'default',
+    'admin': 'default',
+    'sessions': 'default',
+    'messages': 'default',
+    'staticfiles': 'default',
+    'ledger_api_client': 'default', 
+}
 
 # Database
 DATABASES = {
     # Defined in the DATABASE_URL env variable.
     'default': database.config(),
-    #'oracle_finance':  dj_database_url.config(env='ORACLE_FINANCE_DB')
-    'ledger_db': dj_database_url.config(env='LEDGER_DATABASE_URL'),
 }
+if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
+   print ("Skipping ledger_db")
+   pass
+else: 
+   DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+
 
 
 

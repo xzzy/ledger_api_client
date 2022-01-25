@@ -4,8 +4,22 @@ from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.contrib.admin import register, ModelAdmin
-
 from ledger_api_client import models
+from ledger_api_client import managed_models
+
+
+#@admin.register(managed_models.SystemGroupPermission)
+class SystemGroupPermissionInline(admin.TabularInline):
+    model = managed_models.SystemGroupPermission
+    extra = 0
+    raw_id_fields = ('emailuser',)
+
+    # list_display = ('id','emailuser')
+
+@admin.register(managed_models.SystemGroup)
+class SystemGroupAdmin(ModelAdmin):
+    list_display = ('id','name',)
+    inlines = [SystemGroupPermissionInline]
 
 #@admin.register(models.EmailUser)
 #class EmailAdmin(ModelAdmin):
@@ -16,5 +30,4 @@ from ledger_api_client import models
 #@admin.register(models.DataStore)
 #class DataStoreAdmin(ModelAdmin):
 #     list_display = ('id','key_name')
-
 

@@ -14,7 +14,8 @@ from django.db.models.signals import post_delete, pre_save, post_save
 from django.core.exceptions import ValidationError
 from django.utils.crypto import get_random_string
 from django_countries.fields import CountryField
-
+from ledger_api_client import ledger_models
+from ledger_api_client import managed_models
 from datetime import datetime, date
 
 
@@ -48,7 +49,6 @@ class EmailUserManager(BaseUserManager):
 
 #class EmailUser(AbstractBaseUser):
 class EmailUser(AbstractBaseUser, PermissionsMixin):
-
     """Custom authentication model for the ledger project.
     Password and email are required. Other fields are optional.
     """
