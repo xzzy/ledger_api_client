@@ -19,6 +19,7 @@ from datetime import datetime, date
 from django.contrib.auth.models import Permission
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from django.core.cache import cache
+import json
 
 class SystemGroup(models.Model):
     name = models.CharField(max_length=150, unique=True)
@@ -40,7 +41,21 @@ class SystemGroup(models.Model):
 
     def save(self, *args, **kwargs):
         cache.delete("managed_models.SystemGroup.objects.filter(id="+str(self.id)+")") 
+        cache.delete("managed_models.SystemGroup.get_system_group_member_ids:"+str(self.id))
         super(SystemGroup, self).save(*args, **kwargs)
+
+    def get_system_group_member_ids(self):
+        spg_array = []
+        spg_array_cache = cache.get("managed_models.SystemGroup.get_system_group_member_ids:"+str(self.id))
+        
+        if spg_array_cache is None:
+            spg = SystemGroupPermission.objects.filter(system_group=self)
+            for p in spg:
+                spg_array.append(p.emailuser.id)
+                cache.set("managed_models.SystemGroup.get_system_group_member_ids:"+str(self.id), json.dumps(spg_array), 86400)
+        else:
+            spg_array = json.loads(spg_array_cache)
+        return spg_array
 
 
 #customer = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True)
