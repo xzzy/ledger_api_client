@@ -42,6 +42,9 @@ class SystemGroup(models.Model):
         cache.delete("managed_models.SystemGroup.objects.filter(id="+str(self.id)+")") 
         super(SystemGroup, self).save(*args, **kwargs)
 
+    def member_ids(self):
+        return [sgp.emailuser.id for sgp in self.systemgrouppermission_set.all()]
+
 
 #customer = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True)
 
