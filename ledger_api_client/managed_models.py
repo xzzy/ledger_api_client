@@ -42,7 +42,6 @@ class SystemGroup(models.Model):
         cache.delete("managed_models.SystemGroup.objects.filter(id="+str(self.id)+")") 
         super(SystemGroup, self).save(*args, **kwargs)
 
-    @property
     def member_ids(self):
         return [sgp.emailuser.id for sgp in self.systemgrouppermission_set.all()]
 
