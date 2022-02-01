@@ -288,7 +288,7 @@ BPOINT_PASSWORD=env('BPOINT_PASSWORD')
 BPOINT_MERCHANT_NUM=env('BPOINT_MERCHANT_NUM')
 BPOINT_TEST=env('BPOINT_TEST',True)
 # Custom Email Settings
-EMAIL_BACKEND = 'ledger.ledger_email.LedgerEmailBackend'
+EMAIL_BACKEND = 'ledger_api_client.ledger_email.LedgerEmailBackend'
 PRODUCTION_EMAIL = env('PRODUCTION_EMAIL', False)
 # Intercept and forward email recipient for non-production instances
 # Send to list of NON_PROD_EMAIL users instead
@@ -306,3 +306,22 @@ PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE=env('PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
 PAYMENT_INTERFACE_SYSTEM_ID=env('PAYMENT_INTERFACE_SYSTEM_ID','')
 SESSION_EXPIRY_SSO = 883600
 ENABLE_DJANGO_LOGIN=env('ENABLE_DJANGO_LOGIN', False)
+
+LEDGER_UI_ACCOUNTS_MANAGEMENT = [
+            # {'account_name': {'options' : {'view': True, 'edit': True}}},
+            # {'legal_name': {'options' : {'view': True, 'edit': True}}},
+            # {'verified_legal_name': {'options' : {'view': True, 'edit': True}}},
+
+            {'first_name': {'options' : {'view': True, 'edit': True}}},
+            {'last_name': {'options' : {'view': True, 'edit': True}}},
+
+            #{'legal_first_name': {'options' : {'view': True, 'edit': True}}},
+            #{'legal_last_name': {'options' : {'view': True, 'edit': True}}},
+
+            {'dob': {'options' : {'view': True, 'edit': True}}},
+            {'residential_address': {'options' : {'view': True, 'edit': True}}},
+            #{'postal_address': {'options' : {'view': True, 'edit': True}}},
+            {'phone_number' : {'options' : {'view': True, 'edit': True}}},
+            {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
+
+]
