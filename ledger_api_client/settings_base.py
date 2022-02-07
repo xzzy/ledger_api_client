@@ -148,11 +148,15 @@ DATABASES = {
     # Defined in the DATABASE_URL env variable.
     'default': database.config(),
 }
-if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
-   print ("Skipping ledger_db")
-   pass
-else: 
+if len(sys.argv) > 1:
+   if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
+      print ("Skipping ledger_db")
+      pass
+   else: 
+      DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+else:
    DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+
 
 
 
@@ -294,6 +298,7 @@ PRODUCTION_EMAIL = env('PRODUCTION_EMAIL', False)
 # Send to list of NON_PROD_EMAIL users instead
 EMAIL_INSTANCE = env('EMAIL_INSTANCE','PROD')
 NON_PROD_EMAIL = env('NON_PROD_EMAIL')
+
 if not PRODUCTION_EMAIL:
     if not NON_PROD_EMAIL:
         raise ImproperlyConfigured('NON_PROD_EMAIL must not be empty if PRODUCTION_EMAIL is set to False')
@@ -314,14 +319,22 @@ LEDGER_UI_ACCOUNTS_MANAGEMENT = [
 
             {'first_name': {'options' : {'view': True, 'edit': True}}},
             {'last_name': {'options' : {'view': True, 'edit': True}}},
-
             #{'legal_first_name': {'options' : {'view': True, 'edit': True}}},
             #{'legal_last_name': {'options' : {'view': True, 'edit': True}}},
-
             {'dob': {'options' : {'view': True, 'edit': True}}},
+ 
+            #{'identification': {'options' : {'view': True, 'edit': True}}},
+
             {'residential_address': {'options' : {'view': True, 'edit': True}}},
+            {'postal_address': {'options' : {'view': True, 'edit': True}}},
+            {'postal_same_as_residential': {'options' : {'view': True, 'edit': True}}},
+
             #{'postal_address': {'options' : {'view': True, 'edit': True}}},
             {'phone_number' : {'options' : {'view': True, 'edit': True}}},
             {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
 
 ]
+
+LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
+for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
+    LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS.append(list(am.keys())[0])
