@@ -19,6 +19,10 @@ urlpatterns = [
         url(r'^ledger-api/process-zero', api.process_zero),
         url(r'^ledger-api/process-no', api.process_no),
         url(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
+        url(r'^ledger-ui/api/get-settings/', api.get_settings, name='get-settings'),
+        url(r'^ledger-ui/api/get-countries/', api.get_countries, name='get-settings'),
+        url(r'^ledger-ui/api/get-account-details/(?P<user_id>[0-9]+)/', api.get_account_details, name='get-account-details'),
+        url(r'^ledger-ui/api/update-account-details/(?P<user_id>[0-9]+)/', api.update_account_details, name='update-account-details'),
         url(r'^ledger-toolkit-api/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='ledger-api-invoice-pdf'),
 ]
 if settings.ENABLE_DJANGO_LOGIN is True:

@@ -4,9 +4,13 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 from django.template.loader import render_to_string
 from ledger_api_client import utils as ledger_api_client_utils
+from django.core.cache import cache
+import datetime
 import json
 import requests 
 import django
+import urllib.request, json
+import urllib.parse
 
 @csrf_exempt
 #@api_view(['POST'])
@@ -237,4 +241,116 @@ def delete_card_token(request, card_token_id):
     except Exception as e:
         resp = "ERROR Attempting to connect payment gateway please try again later"
     return HttpResponse(resp, content_type='application/json')
+
+def get_settings(request):
+    resp = {'status': 200, 'data': {}, 'message': '', 'config': settings.LEDGER_UI_ACCOUNTS_MANAGEMENT}
+    return HttpResponse(json.dumps(resp), content_type='application/json')
+
+def get_countries(request):
+    resp = {'status': 404, 'data': {}, 'message': ''}
+    json_response = {}
+    url = settings.LEDGER_API_URL+"/ledgergw/public/api/get-countries"
+    data = {}
+    cache_name = "cache:"+url
+    countries_cache = cache.get(cache_name)
+    if countries_cache is None:
+       try:
+           ledger_resp = requests.get(url)
+           json_response = ledger_resp.json()
+           resp['status'] = 200
+           resp['data'] = json_response['data']
+           cache.set(cache_name, json.dumps(json_response['data']), 86400)
+       except Exception as e:
+            print (e)
+            raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')
+    else:
+       countries_loads = json.loads(countries_cache)
+       resp['status'] = 200
+       resp['data'] = countries_loads
+
+    return HttpResponse(json.dumps(resp), content_type='application/json')
+
+def get_account_details(request, user_id):
+    resp = {'status': 404, 'data': {}, 'message': '', 'config': settings.LEDGER_UI_ACCOUNTS_MANAGEMENT}
+    json_response = {}
+    data = {}
+
+    #import time
+    #time.sleep(3)
+
+    allow_access = False
+    is_authen = request.user.is_authenticated
+    if is_authen:
+        if request.user.id == user_id: 
+             allow_access = True
+        if request.user.is_superuser is True:
+             allow_access = True
+        if  request.user.is_staff is True:
+             allow_access = True
+
+    if allow_access is True:
+        with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/userid/"+user_id+"/"+settings.LEDGER_API_KEY+"/", data) as url:
+              json_response = json.loads(url.read().decode())
+
+        for la in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT:
+            field_key = list(la.keys())[0]
+            resp['data'][field_key] = ''
+            if field_key in json_response['user']:
+                  resp['data'][field_key] = json_response['user'][field_key]
+            resp['status'] = 200
+    else:
+        resp['status'] = 403
+        resp['message'] = "Denied"
+
+    return HttpResponse(json.dumps(resp), content_type='application/json')
+
+def update_account_details(request,user_id):
+    resp = {'status': 404, 'data': {}, 'message': ''}
+    json_response = {}
+    api_key = settings.LEDGER_API_KEY
+    data = json.load(request)
+    payload = data.get('payload')
+
+    allow_access = False
+    is_authen = request.user.is_authenticated
+    if is_authen:
+        if request.user.id == user_id:
+             allow_access = True
+        if request.user.is_superuser is True:
+             allow_access = True
+        if  request.user.is_staff is True:
+             allow_access = True
+
+    keys_allowed = []
+    if allow_access is True:
+        for la in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT:
+            field_key = list(la.keys())[0]
+            keys_allowed.append(field_key)
+
+        payload_data_keys = list(payload.keys())
+        url = settings.LEDGER_API_URL+'/ledgergw/remote/update-userid/'+str(user_id)+'/'+api_key+'/'
+        myobj = {}
+        for p in payload_data_keys:
+            if p in keys_allowed:
+               myobj[p] = payload[p]
+               if p == 'residential_address':
+                    myobj[p] = json.dumps(payload[p])
+               if p == 'postal_address':
+                    myobj[p] = json.dumps(payload[p])
+        #resp = ""
+        cookies = ""
+        try:
+            api_resp = requests.post(url, data = myobj, cookies=cookies)
+        except Exception as e:
+            print (e)
+            resp['status'] = 501
+            resp['message'] = "ERROR Attempting to connect payment gateway please try again later"
+
+        resp['status'] = 200
+    else:
+        resp['status'] = 403
+        resp['message'] = "Denied"
+
+    return HttpResponse(json.dumps(resp), content_type='application/json')
+
 
