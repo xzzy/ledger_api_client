@@ -419,6 +419,7 @@ var ledger_management = {
                     }
                     $('#input-ledger-ui-residential-address-country').html(countries_select_html);
                     $('#input-ledger-ui-postal-address-country').html(countries_select_html);
+		    if ('residential_address' in ledger_management.var.config ) {
                     //if ('residential_line1' in ledger_management.var.config ) {
                         $('#input-ledger-ui-residential-address-line1').val(ledger_management.var.account_data.residential_address.line1); 
                     //}
@@ -434,6 +435,9 @@ var ledger_management = {
                     //if ('residential_country' in ledger_management.var.config ) {
                         $('#input-ledger-ui-residential-address-country').val(ledger_management.var.account_data.residential_address.country);
                     //}
+		    }
+
+		    if ('postal_address' in ledger_management.var.config ) {
 
                     //if ('postal_line1' in ledger_management.var.config ) {
 		    // if ('line1' in ledger_management.var.account_data.postal_address) {
@@ -460,6 +464,7 @@ var ledger_management = {
                                  $('#input-ledger-ui-postal-address-same-as-residential').prop('checked', false);
 		         }
                          ledger_management.address.postal_address_disabled();
+		    }
 		    $('#div-ledger-ui-residential-address').show();
                     $('#div-ledger-ui-residential-address-loader').hide();
                     $('#div-ledger-ui-postal-address').show();
