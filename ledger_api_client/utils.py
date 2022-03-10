@@ -178,6 +178,19 @@ def get_basket_total(basket_id):
     return resp_json
 
 
+def get_refund_totals(system_id):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_failed_refund_totals/'+api_key+'/'+system_id+'/'
+    resp = requests.get(url)
+    resp_json = {}
+    
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+
 
 
 class OrderObject():
