@@ -269,7 +269,7 @@ var ledger_management = {
                      html += "         ";
                      html += "       </div>";
                      html += "       <div class='col-5 p-2'> ";
-                     html += "       <div class='fw-bold'>To update your account name or MFA please <a href='/sso/setting'>click here</a>:</div>";
+                     html += "       <div class='fw-bold'>To update your account name or MFA(Multi-Factor Authentication) please <a href='/sso/setting'>click here</a>:</div>";
                      html += "       <div><small><i>Changes will not update until your next login.</i></small></div>";
                      html += "       </div>";
                      html += "       <div class='col-4  p-2'>";
