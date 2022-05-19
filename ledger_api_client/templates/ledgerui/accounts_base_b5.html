@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block extra_js %}
-     <script src="/static/common/node_modules/bootstrap-datepicker/js/bootstrap-datepicker.js?ver={{ GIT_COMMIT_HASH }} "></script>
+     <script src="/static/common/node_modules/bootstrap-datepicker/js/bootstrap-datepicker.js?ver={{ GIT_COMMIT_HASH }}"></script>
 {% endblock %}
 
 {% block extra_css %}
@@ -87,8 +87,10 @@
 <nav class='pb-1'>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
-    <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
-    <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
+    {% block myaccount_nav %}
+       <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
+       <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
+    {% endblock %}
   </div>
 </nav>
 {% if 'first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'dob' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}

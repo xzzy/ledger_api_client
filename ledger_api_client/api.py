@@ -314,7 +314,7 @@ def update_account_details(request,user_id):
     allow_access = False
     is_authen = request.user.is_authenticated
     if is_authen:
-        if request.user.id == user_id:
+        if request.user.id == int(user_id):
              allow_access = True
         if request.user.is_superuser is True:
              allow_access = True
