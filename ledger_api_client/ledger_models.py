@@ -4,17 +4,21 @@ from django.db import models, transaction
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField, IntegerRangeField
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser #PermissionsMixin
 from django.utils import timezone
 from django.db import models
 from ledger_api_client.abstract_address_models import AbstractUserAddress
 from ledger_api_client.address_models import UserAddress
 from ledger_api_client.country_models import Country
+#from ledger_api_client.perms_models import PermissionsMixinRO
 from django_countries.fields import CountryField
 from django.core.files.storage import FileSystemStorage
 #from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext_lazy as _
+from django.core.cache import cache
 
+from django.core.exceptions import PermissionDenied
+from django.contrib import auth
 from django.contrib.auth.models import Group, Permission
 from ledger_api_client import utils
 #from django.utils.encoding import python_2_unicode_compatible
@@ -32,13 +36,15 @@ from django.core.exceptions import ValidationError
 class LedgerDBRouter(object):
 
     def db_for_read(self, model, **hints):
-       #print ("TABLE")
-       #print (model._meta.db_table)
+       if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions':
+           return 'ledger_db'
+       if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
+           return 'ledger_db'
 
-       if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket':
-           return 'ledger_db'
-       if model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
-           return 'ledger_db'
+       if model._meta.db_table == 'django_migrations':
+            return 'default'
+           
+
        #or model._meta.db_table == 'django_admin_log'
        return None
 
@@ -46,8 +52,6 @@ class LedgerDBRouter(object):
         """
         Attempts to write auth and contenttypes models go to auth_db.
         """
-        #print ('DB WRITE')
-        #print (model._meta.db_table)
         if model._meta.db_table == 'accounts_emailuser': # or model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
            return 'ledger_db'
         return None
@@ -56,11 +60,6 @@ class LedgerDBRouter(object):
         """
         Allow relations if a model in the events app is involved.
         """
-        #print ("ALLOW RELATION")
-        #print (obj1._meta.db_table + ' = ' + obj2._meta.db_table)
-        #print ("RELATION")
-        #print (obj1._meta.db_table)
-        #print (obj2._meta.db_table)
         if 'accounts_emailuser' == obj1._meta.db_table and  'parkstay_campgroundgroup_members' == obj2._meta.db_table:
              return True
         if 'accounts_emailuser' == obj1._meta.db_table:
@@ -71,9 +70,6 @@ class LedgerDBRouter(object):
             return True
         if 'django_content_type' == obj1._meta.db_table:
             return True
-        #db_list = ('ledger_db')
-        #if obj1._state.db in db_list and obj2._state.db in db_list: 
-        #    return True        
         return None
 
 
@@ -82,7 +78,6 @@ class LedgerDBRouter(object):
         Make sure the auth app only appears in the 'other_db'  
         database.
         """
-        
         #if app_label == '':
         #    return db == 'other_db'  
         return 'default'
@@ -176,8 +171,7 @@ class BaseAddress(models.Model):
 
     def clean(self):
         # Strip all whitespace
-        for field in ['line1', 'line2', 'line3',
-                      'locality', 'state']:
+        for field in ['line1', 'line2', 'line3', 'locality', 'state']:
             if self.__dict__[field]:
                 self.__dict__[field] = self.__dict__[field].strip()
 
@@ -247,6 +241,7 @@ class BaseAddress(models.Model):
 #     def save(self):
 #         print ("SAVE ADDRESS")
 #
+
 class Address(BaseAddress):
     user = models.ForeignKey('EmailUserRO', related_name='profile_addresses', on_delete=models.DO_NOTHING)
     oscar_address = models.ForeignKey(UserAddress, related_name='profile_addresses', on_delete=models.DO_NOTHING)
@@ -273,6 +268,35 @@ class EmailIdentity(models.Model):
         managed = False
         db_table = 'accounts_emailidentity'
 
+def _user_has_module_perms(user, app_label):
+    """
+    A backend can raise `PermissionDenied` to short-circuit permission checking.
+    """
+    for backend in auth.get_backends():
+
+        if not hasattr(backend, 'has_module_perms'):
+            continue
+        try:
+            if backend.has_module_perms(user, app_label):
+                return True
+        except PermissionDenied:
+            return False
+    return False
+
+def _user_has_perm(user, perm, obj):
+    """
+    A backend can raise `PermissionDenied` to short-circuit permission checking.
+    """
+    for backend in auth.get_backends():
+        if not hasattr(backend, 'has_perm'):
+            continue
+        try:
+            if backend.has_perm(user, perm, obj):
+                return True
+        except PermissionDenied:
+            return False
+    return False
+
 ####
 class PermissionsMixinRO(models.Model):
     """
@@ -297,7 +321,7 @@ class PermissionsMixinRO(models.Model):
         ),
         related_name="user_set_ro",
         related_query_name="user",
-        #db_table="accounts_emailuser_groups",
+        db_table="accounts_emailuser_groups"
     )
     user_permissions = models.ManyToManyField(
         Permission,
@@ -306,11 +330,13 @@ class PermissionsMixinRO(models.Model):
         help_text=_('Specific permissions for this user.'),
         related_name="user_set_ro",
         related_query_name="user",
+        db_table='accounts_emailuser_user_permissions'
     )
 
     class Meta:
         abstract = True
-
+        managed = False
+         
     def get_group_permissions(self, obj=None):
         """
         Returns a list of permission strings that this user has through their
@@ -326,6 +352,37 @@ class PermissionsMixinRO(models.Model):
     def get_all_permissions(self, obj=None):
         return _user_get_all_permissions(self, obj)
 
+    def get_system_group_permission(self,user_id):
+        from ledger_api_client import managed_models
+        cache_name_sgp = 'managed_models.SystemGroupPermission.objects.filter(emailuser_id='+str(user_id)+')'
+        sgp_groups = []
+        sgp_cache = cache.get(cache_name_sgp)
+        if sgp_cache is None:
+            sgp = managed_models.SystemGroupPermission.objects.filter(emailuser_id=self.id)
+            for s in sgp:
+                sgp_groups.append(s.system_group.id)
+            cache.set(cache_name_sgp, json.dumps(sgp_groups), 10)
+        else:
+            sgp_groups = json.loads(sgp_cache)
+        return sgp_groups
+    def system_group_permision_list(self,system_group_id):
+        from ledger_api_client import managed_models
+        permission_list = []
+        cache_name_pl = "managed_models.SystemGroup.objects.filter(id="+str(system_group_id)+")"
+        pl_cache = cache.get(cache_name_pl)
+        if pl_cache is None:
+            system_groups = managed_models.SystemGroup.objects.filter(id=system_group_id)
+            for sg in system_groups:
+                for p in sg.permissions.all():
+                    perm_name = p.content_type.app_label+"."+p.codename
+                    app_label = p.content_type.app_label
+                    permission_list.append({"id":p.id, "perm_name" : perm_name, 'app_label': app_label})
+                    cache.set(cache_name_pl,json.dumps(permission_list), 86400)
+        else:
+            permission_list = json.loads(pl_cache)
+
+        return permission_list
+
     def has_perm(self, perm, obj=None):
         """
         Returns True if the user has the specified permission. This method
@@ -338,9 +395,19 @@ class PermissionsMixinRO(models.Model):
         # Active superusers have all permissions.
         if self.is_active and self.is_superuser:
             return True
+        
+        
+        from ledger_api_client import managed_models       
+        sgp_groups = self.get_system_group_permission(self.id)
 
+        for sgp in sgp_groups:
+              perm_list = self.system_group_permision_list(sgp)
+              for p in perm_list:
+                  if perm == p['perm_name']:
+                       return True
+        return False 
         # Otherwise we need to check the backends.
-        return _user_has_perm(self, perm, obj)
+        #return _user_has_perm(self, perm, obj)
 
     def has_perms(self, perm_list, obj=None):
         """
@@ -350,17 +417,29 @@ class PermissionsMixinRO(models.Model):
         """
         return all(self.has_perm(perm, obj) for perm in perm_list)
 
-
     def has_module_perms(self, app_label):
         """
         Returns True if the user has any permissions in the given app label.
         Uses pretty much the same logic as has_perm, above.
         """
+        #print ("YES BACKEND has_module_perms")
+        #print (app_label)
+
         # Active superusers have all permissions.
         if self.is_active and self.is_superuser:
             return True
 
-        return _user_has_module_perms(self, app_label)
+        sgp_groups = self.get_system_group_permission(self.id)
+
+        for sgp in sgp_groups:
+              perm_list = self.system_group_permision_list(sgp)
+              for p in perm_list:
+                  if app_label == p['app_label']:
+                       return True
+
+        return False 
+        #return Permission.objects.filter(group__user=self.id)
+        #return _user_has_module_perms(self, app_label)
             
 
 ####
@@ -389,7 +468,6 @@ class EmailUserROManager(BaseUserManager):
     def _create_user(self, email, password, is_staff, is_superuser, **extra_fields):
         """Creates and saves an EmailUser with the given email and password.
         """
-        pass
         print ("Can not create users here")
         #if not email:
         #    raise ValueError('Email must be set')
@@ -402,6 +480,7 @@ class EmailUserROManager(BaseUserManager):
         #user.set_password(password)
         #user.save(using=self._db)
         #return user
+
     def create_user(self, email=None, password=None, **extra_fields):
         return self._create_user(email, password, False, False, **extra_fields)
 
@@ -411,10 +490,7 @@ class EmailUserROManager(BaseUserManager):
 
 class objects:
     def filter(**kwargs):
-        
         return ("YES")
-
-
 
 class GroupObj:
   def  __init__(self,group_id, group_name):
@@ -679,6 +755,8 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
 
     def groups(self):
         return GroupsManger(self)  
+EmailUserRO.documents.through._meta.get_field('emailuserro_id').column='emailuser_id'
+
 #EmailUserRO.groups.through._meta.get_field('emailuserro').column='emailuser_id'
 
 

@@ -1,5 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from confy import env, database
+import sys
 import dj_database_url
 import os
 
@@ -124,23 +125,39 @@ HAYSTACK_CONNECTIONS = {
 }
 
 
-# Database
-DATABASES = {
-    # Defined in the DATABASE_URL env variable.
-    'default': database.config(),
-}
+## Database
+#DATABASES = {
+#    # Defined in the DATABASE_URL env variable.
+#    'default': database.config(),
+#}
 
 #DATABASE_ROUTERS = ['ledger.payments.models.OracleFinanceDBRouter']
 DATABASE_ROUTERS = ['ledger_api_client.ledger_models.LedgerDBRouter',]
-DATABASE_APPS_MAPPING = {'ledger_db': 'ledger_db', }
+DATABASE_APPS_MAPPING = {
+    'contenttypes': 'default',
+    'auth': 'default',
+    'admin': 'default',
+    'sessions': 'default',
+    'messages': 'default',
+    'staticfiles': 'default',
+    'ledger_api_client': 'default', 
+}
 
 # Database
 DATABASES = {
     # Defined in the DATABASE_URL env variable.
     'default': database.config(),
-    #'oracle_finance':  dj_database_url.config(env='ORACLE_FINANCE_DB')
-    'ledger_db': dj_database_url.config(env='LEDGER_DATABASE_URL'),
 }
+if len(sys.argv) > 1:
+   if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
+      print ("Skipping ledger_db")
+      pass
+   else: 
+      DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+else:
+   DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+
+
 
 
 
@@ -275,12 +292,13 @@ BPOINT_PASSWORD=env('BPOINT_PASSWORD')
 BPOINT_MERCHANT_NUM=env('BPOINT_MERCHANT_NUM')
 BPOINT_TEST=env('BPOINT_TEST',True)
 # Custom Email Settings
-EMAIL_BACKEND = 'ledger.ledger_email.LedgerEmailBackend'
+EMAIL_BACKEND = 'ledger_api_client.ledger_email.LedgerEmailBackend'
 PRODUCTION_EMAIL = env('PRODUCTION_EMAIL', False)
 # Intercept and forward email recipient for non-production instances
 # Send to list of NON_PROD_EMAIL users instead
 EMAIL_INSTANCE = env('EMAIL_INSTANCE','PROD')
 NON_PROD_EMAIL = env('NON_PROD_EMAIL')
+
 if not PRODUCTION_EMAIL:
     if not NON_PROD_EMAIL:
         raise ImproperlyConfigured('NON_PROD_EMAIL must not be empty if PRODUCTION_EMAIL is set to False')
@@ -293,3 +311,30 @@ PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE=env('PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
 PAYMENT_INTERFACE_SYSTEM_ID=env('PAYMENT_INTERFACE_SYSTEM_ID','')
 SESSION_EXPIRY_SSO = 883600
 ENABLE_DJANGO_LOGIN=env('ENABLE_DJANGO_LOGIN', False)
+
+LEDGER_UI_ACCOUNTS_MANAGEMENT = [
+            # {'account_name': {'options' : {'view': True, 'edit': True}}},
+            # {'legal_name': {'options' : {'view': True, 'edit': True}}},
+            # {'verified_legal_name': {'options' : {'view': True, 'edit': True}}},
+
+            {'first_name': {'options' : {'view': True, 'edit': True}}},
+            {'last_name': {'options' : {'view': True, 'edit': True}}},
+            #{'legal_first_name': {'options' : {'view': True, 'edit': True}}},
+            #{'legal_last_name': {'options' : {'view': True, 'edit': True}}},
+            {'dob': {'options' : {'view': True, 'edit': True}}},
+ 
+            #{'identification': {'options' : {'view': True, 'edit': True}}},
+
+            {'residential_address': {'options' : {'view': True, 'edit': True}}},
+            {'postal_address': {'options' : {'view': True, 'edit': True}}},
+            {'postal_same_as_residential': {'options' : {'view': True, 'edit': True}}},
+
+            #{'postal_address': {'options' : {'view': True, 'edit': True}}},
+            {'phone_number' : {'options' : {'view': True, 'edit': True}}},
+            {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
+
+]
+
+LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
+for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
+    LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS.append(list(am.keys())[0])

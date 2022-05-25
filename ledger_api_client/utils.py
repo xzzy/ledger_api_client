@@ -4,6 +4,10 @@ from decimal import Decimal
 import django
 import requests
 import json 
+from decimal import InvalidOperation
+from babel.numbers import format_currency
+from django.utils.translation import get_language, to_locale
+
 
 def oracle_parser(): 
     pass
@@ -21,6 +25,8 @@ def create_basket_session(request, emailuser_id, parameters):
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
+    no_payment = False
+    no_payment_hash = ''
 
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
@@ -30,12 +36,25 @@ def create_basket_session(request, emailuser_id, parameters):
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
     except Exception as e:
-         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')       
+         raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')
+
     if int(resp.json()['status']) == 200:
          for c in resp.cookies:
               if c.name ==  'sessionid':
                   request.session['payment_session'] = c.value
+                  payment_session = request.session.get('payment_session')
+
+         if 'no_payment' in parameters:
+             no_payment = parameters['no_payment']
+             if no_payment is None:
+                 no_payment = False
+             no_payment_hash = str(no_payment)+"|"+str(payment_session)
+
+       
+
          request.session['basket_hash'] = resp.json()['data']['basket_hash']
+         request.session['no_payment_hash'] = no_payment_hash
+
          return resp.json()['data']['basket_hash']
     else:
         raise ValidationError('Error: Unable to create basket session ') 
@@ -159,6 +178,19 @@ def get_basket_total(basket_id):
     return resp_json
 
 
+def get_refund_totals(system_id):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_failed_refund_totals/'+api_key+'/'+system_id+'/'
+    resp = requests.get(url)
+    resp_json = {}
+    
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+
 
 
 class OrderObject():
@@ -222,6 +254,31 @@ class OrderLine:
                return orderlines_array
 
 
+def calculate_excl_gst(amount):
+    TWELVEPLACES = D(10) ** -12
+    getcontext().prec = 22
+    result = (D(100.0) / D(100 + settings.LEDGER_GST) * D(amount)).quantize(TWELVEPLACES)
+    return result
 
-
+#@register.filter(name='currency')
+def currency(value, currency=None):
+    """
+    Format decimal value as currency
+    """
+    try:
+        value = Decimal(value)
+    except (TypeError, InvalidOperation):
+        return u""
+    # Using Babel's currency formatting
+    # http://babel.pocoo.org/en/latest/api/numbers.html#babel.numbers.format_currency
+    OSCAR_CURRENCY_FORMAT = getattr(settings, 'OSCAR_CURRENCY_FORMAT', None)
+    kwargs = {
+        'currency': currency or settings.OSCAR_DEFAULT_CURRENCY,
+        'locale': to_locale(get_language() or settings.LANGUAGE_CODE)
+    }
+    if isinstance(OSCAR_CURRENCY_FORMAT, dict):
+        kwargs.update(OSCAR_CURRENCY_FORMAT.get(currency, {}))
+    else:
+        kwargs['format'] = OSCAR_CURRENCY_FORMAT
+    return format_currency(value, **kwargs)
 

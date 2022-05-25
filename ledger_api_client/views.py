@@ -42,6 +42,7 @@ class PaymentDetailCheckout(TemplateView):
 
         if 'payment_session' in request.session:
               payment_session = request.session.get('payment_session')
+              no_payment_hash = request.session.get('no_payment_hash')
               basket_hash = request.session.get('basket_hash')
               basket_hash_split = basket_hash.split("|")
 
@@ -50,24 +51,22 @@ class PaymentDetailCheckout(TemplateView):
                   if 'basket_total' in basket_totals['data']:
                         payment_total = Decimal(basket_totals['data']['basket_total'])
 
-
-              #print (basket_hash_split[0])
-              #print (ledger_api_client_utils.Order.objects.get(basket_id=basket_hash_split[0]))
-
               cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key}
 
         myobj = {'payment_method':'card',}
-
         # send request to server to get file
         # allow_redirects=False
-        try: 
-             if payment_total > 0:
-                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-details/'
-             elif payment_total < 0:
-                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-refund/'
-             elif payment_total == 0:
-                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-zero/'
-             
+        try:
+             if "True|"+payment_session == no_payment_hash:
+                   url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-no/'
+             else:
+                   if payment_total > 0:
+                         url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-details/'
+                   elif payment_total < 0:
+                         url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-refund/'
+                   elif payment_total == 0:
+                         url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-zero/'
+
              resp = requests.get(url, data = myobj, cookies=cookies)
              context['data'] = resp.text
         except Exception as e:
