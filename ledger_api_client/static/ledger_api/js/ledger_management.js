@@ -503,7 +503,7 @@ var ledger_management = {
                     if (ledger_management.var.is_loading == false) {
                        ledger_management.address.get_data();
                     } else {
-                       setTimeout("ledger_management.address.get_data_loading();", 200);
+                       setTimeout("ledger_management.address.get_data_loading();", 500);
                     }
                 },
                 update_data: function() {
