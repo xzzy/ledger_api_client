@@ -42,6 +42,7 @@ class SystemGroup(models.Model):
     def save(self, *args, **kwargs):
         cache.delete("managed_models.SystemGroup.objects.filter(id="+str(self.id)+")") 
         cache.delete("managed_models.SystemGroup.get_system_group_member_ids:"+str(self.id))
+        cache.delete("managed_models.SystemGroup.objects.filter(name="+str(self.name)+")")
         super(SystemGroup, self).save(*args, **kwargs)
 
     def get_system_group_member_ids(self):
