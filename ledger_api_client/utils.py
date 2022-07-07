@@ -7,7 +7,7 @@ import json
 from decimal import InvalidOperation
 from babel.numbers import format_currency
 from django.utils.translation import get_language, to_locale
-
+from django.core.cache import cache
 
 def oracle_parser(): 
     pass
@@ -120,6 +120,9 @@ def process_api_refund(request, basket_parameters, customer_id, return_url, retu
     try:
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
+        print ("REFUND RES")
+        print (resp.text)
+
     except Exception as e:
          raise ValidationError('Error: trying to process refund.')
     if int(resp.json()['status']) == 200:
@@ -183,7 +186,6 @@ def get_refund_totals(system_id):
     url = settings.LEDGER_API_URL+'/ledgergw/remote/get_failed_refund_totals/'+api_key+'/'+system_id+'/'
     resp = requests.get(url)
     resp_json = {}
-    
     try:
         resp_json = resp.json()
     except:
@@ -281,4 +283,31 @@ def currency(value, currency=None):
     else:
         kwargs['format'] = OSCAR_CURRENCY_FORMAT
     return format_currency(value, **kwargs)
+
+
+def get_system_group_user_by_name(system_group_name):
+    from ledger_api_client import managed_models
+
+    permission_list = []
+    cache_name_pl = "managed_models.SystemGroup.objects.filter(name="+str(system_group_name)+")"
+    pl_cache = cache.get(cache_name_pl)
+    if pl_cache is None:
+        system_groups = managed_models.SystemGroup.objects.filter(name=system_group_name)
+        for sg in system_groups:
+            for u in managed_models.SystemGroupPermission.objects.filter(system_group=sg,active=True):
+                permission_list.append({"id":u.id, "emailuser_id" : u.emailuser.id,})
+                cache.set(cache_name_pl,json.dumps(permission_list), 86400)
+    else:
+        permission_list = json.loads(pl_cache)
+
+    return permission_list
+
+
+def user_in_system_group(email_user_id, system_group_name):
+
+    system_group_list = get_system_group_user_by_name(system_group_name)
+    for sgl in system_group_list:
+         if email_user_id == sgl['emailuser_id']:
+              return True
+    return False
 
