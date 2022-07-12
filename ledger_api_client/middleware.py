@@ -57,9 +57,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                       if request.user.last_name != request.META['HTTP_X_LAST_NAME']:
                            user_auth = False
 
-                        
-        #print ("AM I AUTH")
-        #print (user_auth)
+
         if not user_auth and 'HTTP_REMOTE_USER' in request.META and request.META['HTTP_REMOTE_USER']:
             attributemap = {
                 'username': 'HTTP_REMOTE_USER',
