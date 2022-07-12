@@ -48,14 +48,16 @@ class SSOLoginMiddleware(MiddlewareMixin):
                 response.delete_cookie('sessionid')
                 return response
 
-        if user_auth:
-            if request.META and request.META['HTTP_REMOTE_USER']:
-                 if request.user.first_name !=  request.META['HTTP_X_FIRST_NAME']:
-                      user_auth = False
+        if user_auth:                        
+            if request.META:
+                 if 'HTTP_REMOTE_USER' in request.META:
+                      if request.user.first_name !=  request.META['HTTP_X_FIRST_NAME']:
+                           user_auth = False
 
-                 if request.user.last_name != request.META['HTTP_X_LAST_NAME']:
-                      user_auth = False
+                      if request.user.last_name != request.META['HTTP_X_LAST_NAME']:
+                           user_auth = False
 
+                        
         #print ("AM I AUTH")
         #print (user_auth)
         if not user_auth and 'HTTP_REMOTE_USER' in request.META and request.META['HTTP_REMOTE_USER']:
