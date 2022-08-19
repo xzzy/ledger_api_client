@@ -1,5 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string, get_template
 from rest_framework.decorators import api_view
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -40,16 +41,32 @@ def process_payment(request):
              myobj['csrfmiddlewaretoken'] = request.POST[post_field]
         else:
             myobj[post_field] = request.POST[post_field]
-
     resp = ""
-    try:
-        # Set payment method first to card
-        resp = requests.post(url, data = myobj, cookies=cookies)
-        # now process payment
-        myobj['action'] = 'place_order'
-        resp = requests.post(url, data = myobj, cookies=cookies)
-    except Exception as e:
-        resp = "ERROR Attempting to connect payment gateway please try again later"
+    proceed_to_ledger = True
+    if 'number' in myobj:
+        if len(myobj["number"]) != 16 and 'card' not in myobj:
+            context ={"message": "The credit card number you provided is invalid"}
+            resp = get_template('payments/payment-details-message.html').render(context)
+            proceed_to_ledger = False
+
+    if proceed_to_ledger is True:
+        try:
+            if myobj["payment_method"] != "card":
+                print ("Not a Valid Card")
+                context ={"message": "There was issue attempting to process your payment request.  The reason is due to invalid payment method selected."}
+                resp = get_template('payments/payment-details-message.html').render(context)
+            else:
+                # Set payment method first to card
+                resp = requests.post(url, data = myobj, cookies=cookies)
+                # now process payment
+                myobj['action'] = 'place_order'
+                resp = requests.post(url, data = myobj, cookies=cookies)
+        except Exception as e:
+            context ={"message": "There was issue attempting to process your payment request.   Connection to the payment gateway failed please try again later"}
+            resp = get_template('payments/payment-details-message.html').render(context)
+    else:
+        pass
+        #resp = "ERROR Attempting to connect payment gateway please try again later"
     return HttpResponse(resp, content_type='plain/html')
     #return HttpResponse(json.dumps(jsondata), content_type='application/json')
 

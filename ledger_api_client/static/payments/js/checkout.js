@@ -70,3 +70,4 @@ $("input[name='card']").change(function(){
         }
     }); 
 });
+
