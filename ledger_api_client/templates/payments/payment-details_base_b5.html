@@ -38,6 +38,10 @@
 {% block menubottom %}
 {%endblock %}
 
+{% block custom_js %}
+     <link rel="stylesheet" type="text/css" href="/static/payments/js/payments.js?ver={{ GIT_COMMIT_HASH }}" />
+{% endblock %}
+
 {% block extra_style %}
 <style>
     .footer {background-color: lightgrey}
