@@ -212,9 +212,11 @@ var ledger_management = {
 
                     $('#input-ledger-ui-given-name').html(ledger_management.var.account_data.first_name);
                     $('#input-ledger-ui-last-name').html(ledger_management.var.account_data.last_name);
-                    if ('dob' in ledger_management.var.account_data) { 
-		       var dob_split = ledger_management.var.account_data.dob.split("/"); 
-                       $("#input-ledger-ui-dob").datepicker("update", new Date(dob_split[2], dob_split[1] - 1, dob_split[0]));
+                    if ('dob' in ledger_management.var.account_data) {
+                       if (ledger_management.var.account_data.dob != null) { 
+  		           var dob_split = ledger_management.var.account_data.dob.split("/"); 
+                           $("#input-ledger-ui-dob").datepicker("update", new Date(dob_split[2], dob_split[1] - 1, dob_split[0]));
+		       }
                     } else {
                        $("#input-ledger-ui-dob").val("");
                     }
