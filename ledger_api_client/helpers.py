@@ -27,10 +27,12 @@ def belongs_to(user, group_name):
     :param group_name:
     :return:
     """
+    print ("ledger-api-client-belongs_to")
     return user.groups().filter(name=group_name).exists()
 
 
 def is_payment_admin(user):
+    print ("(ledger-api-client-is_payment_admin")
     return user.is_authenticated and (belongs_to(user, settings.PAYMENT_OFFICERS_GROUP) or user.is_superuser)
 
 

@@ -851,7 +851,6 @@ class Invoice(models.Model):
         pass
 
 
-
 class Basket(models.Model):
     """
     Basket object

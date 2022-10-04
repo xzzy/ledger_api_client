@@ -14,7 +14,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
     def process_request(self, request):
         User = get_user_model()
         ENABLE_DJANGO_LOGIN=settings.ENABLE_DJANGO_LOGIN
-
+        
         SESSION_EXPIRY_SSO = 3600
         if settings.SESSION_EXPIRY_SSO:
             SESSION_EXPIRY_SSO = settings.SESSION_EXPIRY_SSO
