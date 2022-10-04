@@ -184,6 +184,7 @@ def get_basket_total(basket_id):
 def get_refund_totals(system_id):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/get_failed_refund_totals/'+api_key+'/'+system_id+'/'
+    
     resp = requests.get(url)
     resp_json = {}
     try:
@@ -192,7 +193,53 @@ def get_refund_totals(system_id):
         resp_json = {}
     return resp_json
 
+def get_organisation(organisation_id):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps({'organisation_id': organisation_id})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
 
+def create_organisation(organisation_name, organisation_abn):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/create_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps({'organisation_name': organisation_name, 'organisation_abn': organisation_abn})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:        
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+def update_organisation(organisation_id, organisation_name, organisation_abn):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/update_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps({'organisation_id': organisation_id, 'organisation_name': organisation_name, 'organisation_abn': organisation_abn})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:        
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+def get_organisation(organisation_id):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps({'organisation_id': organisation_id,})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
 
 
 class OrderObject():
