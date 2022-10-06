@@ -193,6 +193,19 @@ def get_refund_totals(system_id):
         resp_json = {}
     return resp_json
 
+def get_or_create(email):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/create_get_emailuser/'+api_key+'/'
+    myobj = {'data': json.dumps({'email': email})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:
+        print (resp.text)
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
 def get_organisation(organisation_id):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/get_organisation/'+api_key+'/'
