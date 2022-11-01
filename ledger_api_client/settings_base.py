@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.flatpages',
+#    'django.contrib.flatpages',
     'django_extensions',
     'widget_tweaks',
     'django_countries',
@@ -61,7 +61,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'ledger_api_client.middleware.SSOLoginMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    #'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 # Authentication settings
@@ -334,6 +334,7 @@ LEDGER_UI_ACCOUNTS_MANAGEMENT = [
             {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
 
 ]
+LEDGER_UI_CARDS_MANAGEMENT = False
 
 LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
 for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
