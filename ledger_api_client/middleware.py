@@ -37,7 +37,6 @@ class SSOLoginMiddleware(MiddlewareMixin):
                      user_obj = {'email': None, 'first_name': None, "last_name": None, "user_id" : None}
                      is_authenticated = None
                      if 'is_authenticated' in request.session and 'user_obj' in request.session:
-                          print ("SESSION")
                           #request.session['is_authenticated'] = request.user.is_authenticated
                           is_authenticated = request.session['is_authenticated']
                           user_obj = request.session['user_obj']
@@ -49,10 +48,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                                user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name}
                                request.session['user_obj'] = user_obj
                      user_auth = is_authenticated
-                     print (user_auth)
-                     print (user_obj)
                      #user_auth = user_obj.is_authenticated
-                     #return {}
                      if user_auth is True:
                           pass
                           if ENABLE_DJANGO_LOGIN is True:
