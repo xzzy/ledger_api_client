@@ -12,11 +12,12 @@ from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirec
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-
+      
         if request.path.startswith('/static') or request.path.startswith('/favicon') or request.path.startswith('/media'):
              print ("no static")
              pass
         else:
+             pass
              User = get_user_model()
              ENABLE_DJANGO_LOGIN=settings.ENABLE_DJANGO_LOGIN
              
@@ -26,13 +27,28 @@ class SSOLoginMiddleware(MiddlewareMixin):
              if (request.path.startswith('/logout') or request.path.startswith('/ledger/logout')) \
                          and 'HTTP_X_LOGOUT_URL' in request.META and request.META['HTTP_X_LOGOUT_URL']:
                  logout(request)
+                 del request.session['is_authenticated']
                  return http.HttpResponseRedirect(request.META['HTTP_X_LOGOUT_URL'])
 
              if VERSION < (2, 0):
                  user_auth = request.user.is_authenticated()
              else:
                  try:
-                     user_auth = request.user.is_authenticated
+                     user_obj = {'email': None, 'first_name': None, "last_name": None, "user_id" : None}
+                     is_authenticated = None
+                     if 'is_authenticated' in request.session and 'user_obj' in request.session:
+                          #request.session['is_authenticated'] = request.user.is_authenticated
+                          is_authenticated = request.session['is_authenticated']
+                          user_obj = request.session['user_obj']
+                     
+                     if is_authenticated is None:
+                          is_authenticated = request.user.is_authenticated
+                          request.session['is_authenticated'] = is_authenticated
+                          if is_authenticated is True:
+                               user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name}
+                               request.session['user_obj'] = user_obj
+                     user_auth = is_authenticated
+                     #user_auth = user_obj.is_authenticated
                      if user_auth is True:
                           pass
                           if ENABLE_DJANGO_LOGIN is True:
@@ -42,7 +58,8 @@ class SSOLoginMiddleware(MiddlewareMixin):
                                          return response 
                           else:
                               pass
-                              if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
+                              #if request.user.email.lower() != request.META['HTTP_REMOTE_USER'].lower():
+                              if user_obj['email'].lower() != request.META['HTTP_REMOTE_USER'].lower():
                                   response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
                                   response.delete_cookie('sessionid')
                                   return response
@@ -51,15 +68,15 @@ class SSOLoginMiddleware(MiddlewareMixin):
                      response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
                      response.delete_cookie('sessionid')
                      return response
-
+            
              if user_auth:                        
                  if request.META:
                       if 'HTTP_REMOTE_USER' in request.META:
                            if 'HTTP_X_FIRST_NAME' in request.META:
-                               if request.user.first_name !=  request.META['HTTP_X_FIRST_NAME']:
+                               if user_obj['first_name'] !=  request.META['HTTP_X_FIRST_NAME']:
                                     user_auth = False
                            if 'HTTP_X_LAST_NAME' in request.META:
-                               if request.user.last_name != request.META['HTTP_X_LAST_NAME']:
+                               if user_obj['last_name'] != request.META['HTTP_X_LAST_NAME']:
                                     user_auth = False
 
 
@@ -123,3 +140,4 @@ class SSOLoginMiddleware(MiddlewareMixin):
                  user.backend = 'django.contrib.auth.backends.ModelBackend'
                  request.session.set_expiry(SESSION_EXPIRY_SSO)
                  login(request, user)
+                 del request.session['is_authenticated']
