@@ -27,14 +27,18 @@ class SSOLoginMiddleware(MiddlewareMixin):
              if (request.path.startswith('/logout') or request.path.startswith('/ledger/logout')) \
                          and 'HTTP_X_LOGOUT_URL' in request.META and request.META['HTTP_X_LOGOUT_URL']:
                  logout(request)
-                 del request.session['is_authenticated']
+                 if 'is_authenticated' in request.session:
+                      del request.session['is_authenticated']
+                 if 'user_obj' request.session:
+                      del request.session['user_obj']
+
                  return http.HttpResponseRedirect(request.META['HTTP_X_LOGOUT_URL'])
 
              if VERSION < (2, 0):
                  user_auth = request.user.is_authenticated()
              else:
                  try:
-                     user_obj = {'email': None, 'first_name': None, "last_name": None, "user_id" : None}
+                     user_obj = {'email': None, 'first_name': None, "last_name": None, "user_id" : None, 'is_staff': False}
                      is_authenticated = None
                      if 'is_authenticated' in request.session and 'user_obj' in request.session:
                           #request.session['is_authenticated'] = request.user.is_authenticated
@@ -45,8 +49,8 @@ class SSOLoginMiddleware(MiddlewareMixin):
                           is_authenticated = request.user.is_authenticated
                           request.session['is_authenticated'] = is_authenticated
                           if is_authenticated is True:
-                               user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name}
-                               request.session['user_obj'] = user_obj
+                              user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name, 'is_staff': request.user.is_staff}
+                              request.session['user_obj'] = user_obj
                      user_auth = is_authenticated
                      #user_auth = user_obj.is_authenticated
                      if user_auth is True:
