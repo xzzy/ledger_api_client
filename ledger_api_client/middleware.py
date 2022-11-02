@@ -29,7 +29,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                  logout(request)
                  if 'is_authenticated' in request.session:
                       del request.session['is_authenticated']
-                 if 'user_obj' request.session:
+                 if 'user_obj' in request.session:
                       del request.session['user_obj']
 
                  return http.HttpResponseRedirect(request.META['HTTP_X_LOGOUT_URL'])
