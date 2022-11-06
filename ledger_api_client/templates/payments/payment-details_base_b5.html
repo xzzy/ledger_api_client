@@ -15,7 +15,6 @@
          <button type="button" class="btn btn-sm btn-secondary">
                   Notification 1 <span class="badge bg-danger">14</span>
          </button>
-
 </li>
 
 <li>
@@ -53,8 +52,8 @@
 
 
 {% block content %}
+    {% block page_content_inner_top %}{% endblock %}
     <div class="">
-
         <!-- Messages  -->
         {% if messages %}
         <div class="row">
