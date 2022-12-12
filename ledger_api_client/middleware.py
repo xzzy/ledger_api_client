@@ -12,9 +12,8 @@ from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirec
 class SSOLoginMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-      
+       
         if request.path.startswith('/static') or request.path.startswith('/favicon') or request.path.startswith('/media'):
-             print ("no static")
              pass
         else:
              pass
@@ -26,12 +25,12 @@ class SSOLoginMiddleware(MiddlewareMixin):
                  SESSION_EXPIRY_SSO = settings.SESSION_EXPIRY_SSO
              if (request.path.startswith('/logout') or request.path.startswith('/ledger/logout')) \
                          and 'HTTP_X_LOGOUT_URL' in request.META and request.META['HTTP_X_LOGOUT_URL']:
-                 logout(request)
+                 print ("LOGGING OUT")
                  if 'is_authenticated' in request.session:
                       del request.session['is_authenticated']
                  if 'user_obj' in request.session:
                       del request.session['user_obj']
-
+                 logout(request)
                  return http.HttpResponseRedirect(request.META['HTTP_X_LOGOUT_URL'])
 
              if VERSION < (2, 0):

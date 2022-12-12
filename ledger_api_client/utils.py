@@ -1,3 +1,4 @@
+import re
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from decimal import Decimal
@@ -21,13 +22,13 @@ def create_basket_session(request, emailuser_id, parameters):
     #request to request.user.id for this function
     payment_session = None
     cookies = None 
- 
+    print ('AQUI 3')
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
     no_payment = False
     no_payment_hash = ''
-
+    print ("AQUI 4")
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
     myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id,}
@@ -80,8 +81,6 @@ def create_checkout_session(request, checkout_parameters):
     else:
         raise ValidationError('Error: "basket_owner" does not exist in create_checkout_session, this must have matching email user id')
           
-
-
     cookies = {}
     if 'payment_session' in request.session:
         payment_session = request.session.get('payment_session')
@@ -136,6 +135,61 @@ def process_api_refund(request, basket_parameters, customer_id, return_url, retu
         raise ValidationError('Error: Unable to create checkout session ')
 
 
+def process_payment_with_token(request, card_token_id):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    context = {}
+    cookies = {}
+    #url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/preview/'
+    url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/payment-details/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    api_key = settings.LEDGER_API_KEY
+    payment_session = None
+    basket_hash = ""
+
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+          basket_hash = request.session.get('basket_hash')
+          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.session['payment_session'],'LEDGER_API_KEY': api_key,}
+
+    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 'csrfmiddlewaretoken' : request.session['payment_session'], 'payment_method' : 'card', 'checkout_token' : True, 'card': card_token_id}
+    resp = ""
+    proceed_to_ledger = True
+    if 'number' in myobj:
+        if len(myobj["number"]) != 16 and 'card' not in myobj:
+            context ={"message": "The credit card number you provided is invalid"}
+            resp = get_template('payments/payment-details-message.html').render(context)
+            proceed_to_ledger = False
+
+    if proceed_to_ledger is True:
+        try:
+            if myobj["payment_method"] != "card":
+                context ={"message": "There was issue attempting to process your payment request.  The reason is due to invalid payment method selected."}
+            else:
+                # Set payment method first to card
+                resp = requests.post(url, data = myobj, cookies=cookies)
+                # now process payment
+                myobj['action'] = 'place_order'
+                resp = requests.post(url, data = myobj, cookies=cookies)
+                resp_json = {}
+                jsondata['status'] = 200
+                try: 
+                    resp_json = resp.json()
+                    jsondata['status'] = resp.json()['status']
+                    jsondata['message'] = resp.json()['message']
+                except: 
+                    jsondata['status'] = 500
+        except Exception as e:
+            jsondata['status'] = 500
+            context ={"message": "There was issue attempting to process your payment request.   Connection to the payment gateway failed please try again later"}
+    else:
+        pass
+        #resp = "ERROR Attempting to connect payment gateway please try again later"
+    jsondata['context'] = context
+    return jsondata 
 
 def payment_details_checkout(request):
     pass
@@ -179,7 +233,6 @@ def get_basket_total(basket_id):
     except:
         resp_json = {}
     return resp_json
-
 
 def get_refund_totals(system_id):
     api_key = settings.LEDGER_API_KEY
@@ -250,6 +303,21 @@ def get_organisation(organisation_id):
     resp_json = {}
     try:
         resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+def get_primary_card_token_for_user(user_id):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/check-user-primary-card/'+api_key+'/'
+    myobj = {'data': json.dumps({'user_id': user_id,})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    print (resp)
+    print (resp.text)
+    try:
+        resp_json = resp.json()
+        print (resp_json)
     except:
         resp_json = {}
     return resp_json
@@ -370,4 +438,17 @@ def user_in_system_group(email_user_id, system_group_name):
          if email_user_id == sgl['emailuser_id']:
               return True
     return False
+
+
+class FakeRequestSessionObj():
+     def __init__(self):
+         self.session = {}
+         self.user = None
+         pass
+
+     def __getitem__(self, item):
+         return self.session[item]
+
+     def build_absolute_uri(self):
+         return ''
 
