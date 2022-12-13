@@ -200,7 +200,8 @@ def get_card_tokens(request):
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           basket_hash = request.session.get('basket_hash')
-          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
+          #cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
+          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
 
     myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 'user_logged_in' : user_logged_in}
     for post_field in request.POST:
@@ -244,7 +245,8 @@ def delete_card_token(request, card_token_id):
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           basket_hash = request.session.get('basket_hash')
-          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
+          #cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
+          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
 
     myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 'card_token_id': card_token_id, 'user_logged_in' : user_logged_in}
     for post_field in request.POST:
@@ -260,6 +262,150 @@ def delete_card_token(request, card_token_id):
         resp = "ERROR Attempting to connect payment gateway please try again later"
     return HttpResponse(resp, content_type='application/json')
 
+@csrf_exempt
+def store_card(request):
+    django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/create-store-card-token/'+api_key+'/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    api_key = settings.LEDGER_API_KEY
+    payment_session = None
+    data = json.load(request)
+    payload = data.get('payload')      
+
+    user_logged_in = None
+    if django_version > 1.11:
+          is_authen = request.user.is_authenticated
+    else: 
+          is_authen = request.user.is_authenticated()
+
+    if is_authen:
+           user_logged_in = request.user.id
+
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+          basket_hash = request.session.get('basket_hash')
+          cookies = {'sessionid': payment_session, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
+
+    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 'user_logged_in' : user_logged_in, 'payload': json.dumps(payload)}
+    # for post_field in request.POST:
+    #     if post_field == 'payment-csrfmiddlewaretoken':
+    #         myobj['csrfmiddlewaretoken'] = request.POST[post_field]
+    #     else:
+    #         myobj[post_field] = request.POST[post_field]
+
+    resp = ""
+    try:
+        print ("START")
+        print (url)
+        resp = requests.post(url, data = myobj, cookies=cookies)
+        print (resp.text)
+    except Exception as e:
+        print (e)
+        resp = "ERROR Attempting to connect payment gateway please try again later"
+    return HttpResponse(resp, content_type='application/json')
+
+@csrf_exempt
+def set_primary_card(request):
+    django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/set-primary-card/'+api_key+'/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    api_key = settings.LEDGER_API_KEY
+    payment_session = None
+    data = json.load(request)
+    payload = data.get('payload')      
+
+    user_logged_in = None
+    if django_version > 1.11:
+          is_authen = request.user.is_authenticated
+    else: 
+          is_authen = request.user.is_authenticated()
+
+    if is_authen:
+           user_logged_in = request.user.id
+
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+          basket_hash = request.session.get('basket_hash')
+          cookies = {'sessionid': payment_session, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
+
+    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 'user_logged_in' : user_logged_in, 'payload': json.dumps(payload)}
+
+    resp = ""
+    try:
+        resp = requests.post(url, data = myobj, cookies=cookies)
+        print (resp.text)
+    except Exception as e:
+        print (e)
+        resp = "ERROR Attempting to connect payment gateway please try again later"
+    return HttpResponse(resp, content_type='application/json')
+
+
+
+@csrf_exempt
+def store_card_old(request):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    context = {}
+    cookies = {}
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/create-store-card-token/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    api_key = settings.LEDGER_API_KEY
+    payment_session = None
+    basket_hash = ""
+
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+          basket_hash = request.session.get('basket_hash')
+          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
+
+    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id}
+    for post_field in request.POST:
+        if post_field == 'payment-csrfmiddlewaretoken':
+             myobj['csrfmiddlewaretoken'] = request.POST[post_field]
+        else:
+            myobj[post_field] = request.POST[post_field]
+    resp = ""
+    proceed_to_ledger = True
+    if 'number' in myobj:
+        if len(myobj["number"]) != 16 and 'card' not in myobj:
+            context ={"message": "The credit card number you provided is invalid"}
+            resp = get_template('payments/payment-details-message.html').render(context)
+            proceed_to_ledger = False
+
+    if proceed_to_ledger is True:
+        try:
+            if myobj["payment_method"] != "card":
+                print ("Not a Valid Card")
+                context ={"message": "There was issue attempting to store your card.  The reason is due to invalid payment method selected."}
+                resp = get_template('payments/payment-details-message.html').render(context)
+            else:
+                # Set payment method first to card
+                resp = requests.post(url, data = myobj, cookies=cookies)
+                # now process payment
+                #myobj['action'] = 'place_order'
+                #resp = requests.post(url, data = myobj, cookies=cookies)
+        except Exception as e:
+            context ={"message": "There was issue attempting to store your card.   Connection to the payment gateway failed please try again later"}
+            resp = get_template('payments/payment-details-message.html').render(context)
+    else:
+        pass        
+    return HttpResponse(resp, content_type='plain/html')
+ 
 def get_settings(request):
     resp = {'status': 200, 'data': {}, 'message': '', 'config': settings.LEDGER_UI_ACCOUNTS_MANAGEMENT}
     return HttpResponse(json.dumps(resp), content_type='application/json')

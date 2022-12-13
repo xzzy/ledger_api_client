@@ -86,13 +86,18 @@
 <br>
 <nav class='pb-1'>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
-    <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
+    <button class="nav-link active managed-account-nav" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
+    {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+        <button class="nav-link managed-account-nav " id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Manage Cards</button>
+    {% endif %}
     {% block myaccount_nav %}
-       <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
-       <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
+       <button class="nav-link  managed-account-nav" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
+       <button class="nav-link  managed-account-nav" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
     {% endblock %}
   </div>
 </nav>
+
+<div id='nav-details-tab-page'>
 {% if 'first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'dob' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
 <div class="card" id='personal-details-card-box'>
   <div class="card-header fw-bold h4" style='padding:30px;'>
@@ -180,7 +185,6 @@
 </div>
 
 
-
 		{% endblock %}
             </div>
         </div>
@@ -188,11 +192,129 @@
    </div>
 <script>
 ledger_management.init({{ request.user.id }});
-//ledger_management.accounts.init({{ request.user.id }});
-// ledger_management.identification.init();
-//ledger_management.address.init();
-//ledger_management.contact.init();
 </script>
+
+{% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+
+<div class="modal fade" id="AddNewCardModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+            <div id="ledger_ui_add_card_message"></div>
+            <div class="clearfix">
+              <img src="/static/payments/img/visa-mastercard-2021.png">
+            </div>
+            <div class='col-9'>
+              <div class="form-group ">  
+                <label for="id_number" class=" control-label required">
+                    Card number
+                </label>
+                <div class="">
+                      <input type="text" name="number" autocomplete="off" maxlength="20" class="form-control" required="" id="id_number">
+                </div>  
+                </div>
+            </div>
+            <div class='col-9'>
+              <div class="form-group ">                
+                <label for="id_expiry_month" class=" control-label required">
+                    Valid to
+                </label>        
+                <div class="">              
+                  <select name="expiry_month_0" class="form-control" required="" id="id_expiry_month_0"><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10" selected="">10</option><option value="11">11</option><option value="12">12</option></select><select name="expiry_month_1" class="form-control" required="" id="id_expiry_month_1"><option value="2022" selected="">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option><option value="2029">2029</option><option value="2030">2030</option><option value="2031">2031</option></select>                   
+                </div>    
+              </div>
+            </div>
+
+            <div class='col-9'>
+              <div class="form-group ">
+                <label for="id_ccv" class=" control-label required">
+                    CCV number
+                </label>
+                <div class="">
+                    <input type="text" name="ccv" size="5" class="form-control" required="" id="id_ccv">
+                    <span class="help-block">                      
+                          This is the 3 or 4 digit security number on the back of your bankcard
+                    </span>
+                </div>    
+              </div>
+            </div>
+            <div class='col-9'> 
+                  <button class='btn btn-primary' id='save-card-button'>Save Card</button> <span id='save_card_loader'></span>
+            </div>       
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="PrimaryCardModal" tabindex="-1" aria-labelledby="PrimaryCardLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PrimaryCardLabel">Set Default Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">        
+        <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+            <div id="ledger_ui_primary_card_message"></div>
+            <div id="ledger_ui_primary_card_note">Please select a default primary card for automatic payment renewals</div>
+            <div id="ledger_ui_primary_card_list"></div> 
+            <div class='col-12 text-end'> 
+              <button class='btn btn-primary' id='save-primary-card-button'>Set Primary Card</button><span id='save_primary_card_loader'></span>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" id="DeleteCardConfirmModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmation to delete card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Please confirm that you would like to remove the card.</p>
+      </div>
+      <input type='hidden' value='' name='delete_card_id' id='delete_card_id'>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id='delete_card_confirm_btn'>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id='nav-cards-tab-page' >
+  <div class="card">
+    <div class="card-header fw-bold h4" style='padding:30px;'>
+      <div class='row'>
+            <div class='col-6'>
+                  <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp; Cards
+            </div>
+            <div class='col-6 text-end'>
+                  <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_card-details-card-body"></i>
+            </div>
+        </div>
+    </div>
+    <div class="card-body" id='ledger_ui_card-details-card-body'>
+       <div id="ledger_ui_card_details"></div>
+            
+    </div>
+  </div>
+</div>
+{% endif %}
+</div>
+
 {% endblock %}
 
 {% block page_footer %}

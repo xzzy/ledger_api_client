@@ -1,35 +1,41 @@
 var ledger_management = {
 	var: {
-                 config: {},
-		 data: {accounts: {user_id: null, org_id: null}},
-                 countries: [],
-                 account_data: {},
-	         address: {},
-		 identification: {},
-		 contact: {},
-                 is_loading: false,
-		 csrf_token: '',
-                 steps: {step1: {completed: false, loading: false, exec: function() {
-			              ledger_management.init_load_order.step1();
-			           }}, 
-                    		   step2: {completed: false,  loading: false, exec: function() {
-				           ledger_management.init_load_order.step2();
-				   }}, 
-                                   step3: {completed: false, loading: false, exec: function() {
-				           ledger_management.init_load_order.step3();
-				   }},
-                                   step4: {completed: false, loading: false, exec: function() {
-                                           ledger_management.init_load_order.step4();
-                                   }},
-
-				  },
-                 pagesettings: {
-                  loader: "<div class='text-center p-5'><div class='spinner-grow text-primary' role='status'><span class='visually-hidden'>Loading...</span></div><div class='fw-bold'>Loading</div></div>",
-                 }
+                config: {},
+		        data:  {accounts: {user_id: null, org_id: null}},
+                countries: [],
+                account_data: {},
+	            address: {},
+		        identification: {},
+		        contact: {},
+                is_loading: false,
+		        csrf_token: '',
+                steps:  {step1: {completed: false, loading: false, exec: function() {
+			                ledger_management.init_load_order.step1();
+			            }}, 
+                 	    step2: {completed: false,  loading: false, exec: function() {
+				            ledger_management.init_load_order.step2();
+				        }}, 
+                        step3: {completed: false, loading: false, exec: function() {
+				            ledger_management.init_load_order.step3();
+				        }},
+                        step4: {completed: false, loading: false, exec: function() {
+                            ledger_management.init_load_order.step4();
+                        }},
+                        step5: {completed: false, loading: false, exec: function() {
+                            ledger_management.init_load_order.step5();
+                        }},                    
+				},
+                cards: [],
+                primary_card_id: -1,
+                pagesettings: {
+                     loader: "<div class='text-center p-5'><div class='spinner-grow text-primary' role='status'><span class='visually-hidden'>Loading...</span></div><div class='fw-bold'>Loading</div></div>",
+                     button_loader: "<button class='btn btn-primary' type='button' disabled><span class='spinner-grow spinner-grow-sm' role='status'></span>&nbsp;&nbsp;Loading...</button>"
+                }
         },
         init: function (user_id) {
 	    ledger_management.var.data.accounts.user_id = user_id;
 	    ledger_management.init_begin();
+  
         },
         init_begin: function() {
              var load_steps = Object.keys(ledger_management.var.steps);   
@@ -114,7 +120,11 @@ var ledger_management = {
                  //if ($("#ledger_ui_contact_details").length > 0) {
                  //       ledger_management.contact.init();           
                  //}
+            },
+            step5: function() {
+                ledger_management.cards.init();            
             }
+
         },
 	update_account_details: function(data) {
 		 ledger_management.var.is_loading = true;
@@ -194,10 +204,10 @@ var ledger_management = {
                            contentType: 'application/json',
                            //data: "{}",
                            success: function(response) {
-                               ledger_management.var.countries = response.data;
-			       ledger_management.var.steps['step3'].loading = false;
-			       ledger_management.var.steps['step3'].completed = true;
-                               ledger_management.var.is_loading = false;
+                                ledger_management.var.countries = response.data;
+			                    ledger_management.var.steps['step3'].loading = false;
+			                    ledger_management.var.steps['step3'].completed = true;
+                                ledger_management.var.is_loading = false;
                            },
                            error: function(error) {
                                $('#div-ledger-ui-accounts').show();
@@ -206,7 +216,7 @@ var ledger_management = {
                            },
                        });
         },
-	accounts: { 
+	    accounts: { 
 		get_data: function() {
                     // $('#div-ledger-ui-accounts').hide();
 
@@ -363,7 +373,6 @@ var ledger_management = {
                 get_data: function() {
                     $('#div-ledger-ui-identification').show();
                     $('#div-ledger-ui-identification-loader').hide();
-
                 },
                 get_data_loading: function() {
                     $('#div-ledger-ui-identification').hide();
@@ -421,7 +430,7 @@ var ledger_management = {
                     }
                     $('#input-ledger-ui-residential-address-country').html(countries_select_html);
                     $('#input-ledger-ui-postal-address-country').html(countries_select_html);
-		    if ('residential_address' in ledger_management.var.config ) {
+		    if ('residential_address' in ledger_management.var.config) {
                     //if ('residential_line1' in ledger_management.var.config ) {
                         $('#input-ledger-ui-residential-address-line1').val(ledger_management.var.account_data.residential_address.line1); 
                     //}
@@ -739,7 +748,7 @@ var ledger_management = {
 
                 }
 	},
-        contact: {
+    contact: {
                 get_data: function() {
                     $('#input-ledger-ui-contact-phone').val(ledger_management.var.account_data.phone_number);
                     $('#input-ledger-ui-contact-mobile').val(ledger_management.var.account_data.mobile_number);
@@ -812,5 +821,236 @@ var ledger_management = {
                      });
                 }
         },
+        "cards": {
+            get_card_data: function() {
+                $.ajax({
+                    url: '/ledger-toolkit-api/get-card-tokens',
+                    method: 'GET',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function(response) {
+
+                       ledger_management.var.cards = response.card_tokens;
+                       ledger_management.var.primary_card_id = response.primary_card
+                       ledger_management.cards.display_cards();
+                    },
+                    error: function(error) {
+                            
+                    },
+                });
+            },
+            delete_card:function(card_id) {
+                $.ajax({
+                    url: '/ledger-toolkit-api/delete-card-token/'+card_id+'/',
+                    method: 'GET',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function(response) {
+                       ledger_management.cards.get_card_data();
+                    },
+                    error: function(error) {
+
+                    },
+                });
+                
+	        },
+            delete_card_confirm: function(card_id) { 
+                $('#DeleteCardConfirmModal').modal('show');
+                $('#delete_card_id').val(card_id);
+            },
+            save_card: function() { 
+                var id_number = $('#id_number').val();
+                var id_expiry_month_0 = $('#id_expiry_month_0').val();
+                var id_expiry_month_1 = $('#id_expiry_month_1').val();
+                var ccv = $('#id_ccv').val();
+
+                $('#id_number').prop( "disabled", true );
+                $('#id_expiry_month_0').prop( "disabled", true );
+                $('#id_expiry_month_1').prop( "disabled", true );
+                $('#id_ccv').prop( "disabled", true );               
+
+                $("#save-card-button").hide();
+                $("#save_card_loader").show();
+                var data = { 
+                            'number': id_number, 
+                            'expiry_month_0': id_expiry_month_0, 
+                            'expiry_month_1': id_expiry_month_1, 
+                            'ccv': ccv,
+                            'store_card': true
+                            };
+
+                $.ajax({
+                    url: '/ledger-toolkit-api/store-card/',
+                    method: 'POST',
+                    dataType: 'json',
+                    data: JSON.stringify({'payload': data,}),
+                    contentType: 'application/json',
+                    success: function(response) {
+                       ledger_management.cards.get_card_data();
+                       if (response['status'] == 200) {
+                            $('#AddNewCardModal').modal('hide');
+                            $('#ledger_ui_add_card_message').html('');
+                            $('#id_number').val('');
+                            $('#id_expiry_month_0').val('');
+                            $('#id_expiry_month_1').val('');
+                            $('#id_ccv').val('');
+                       } else {
+                            var error = '';
+                            error = response['error'];
+                            $('#ledger_ui_add_card_message').html('<div class="alert alert-danger" role="alert">Error adding card, please check your details and try again. '+error+'</div>');                        
+                       }
+
+                       $('#id_number').prop( "disabled", false );
+                       $('#id_expiry_month_0').prop( "disabled", false );
+                       $('#id_expiry_month_1').prop( "disabled", false );
+                       $('#id_ccv').prop( "disabled", false );   
+
+                       $("#save-card-button").show();
+                       $("#save_card_loader").hide();                       
+                    },
+                    error: function(error) {
+                            alert("Error Saving Store Card");
+                    },
+                });                             
+            },
+            primary_display_cards: function() {
+                var primary_card = '';
+                var html = "";
+                html += "<div class='row pt-3 pb-3 ps-5 pe-5'>";
+                // html += "<div class='col-1'>Primary Card</div><div class='col-8'>Card</div><div>Action</div>";
+                if (ledger_management.var.primary_card_id == null) {
+                    primary_card = 'checked';
+                }
+                html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;No card</div><div class='col-4 pt-1'><div class='form-check'><input class='form-check-input' type='radio' name='primary-card' id='flexRadioDefault1' value='-1' "+primary_card+"></div></div>";
+                for (let i = 0; i < ledger_management.var.cards.length; i++) {
+                    primary_card = '';
+                    if (parseInt(ledger_management.var.primary_card_id) == parseInt(ledger_management.var.cards[i].id)) { 
+                        primary_card = 'checked';               
+                    }
+		            html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;"+ledger_management.var.cards[i].card_type+" ending "+ledger_management.var.cards[i].last_digits+" with expiry "+ledger_management.var.cards[i].expiry_date+"</div><div class='col-4 pt-1'><div class='form-check'><input class='form-check-input' type='radio' name='primary-card' id='PrimaryCard"+ledger_management.var.cards[i].id+"' value='"+ledger_management.var.cards[i].id+"' "+primary_card+"></div></div>";
+                }
+                html += "</div>";
+
+                $('#ledger_ui_primary_card_list').html(html);
+                
+
+            },
+            save_primary_card: function() {
+                $("#save-primary-card-button").hide();
+                $("#save_primary_card_loader").show();  
+                $("input[name=primary-card]").prop( "disabled", true );
+
+                var default_card_id = $("input[name=primary-card]:checked").val();
+                var data = {"default_card_id": default_card_id};
+
+                $.ajax({
+                    url: '/ledger-toolkit-api/set-primary-card/',
+                    method: 'POST',
+                    dataType: 'json',
+                    data: JSON.stringify({'payload': data,}),
+                    contentType: 'application/json',
+                    success: function(response) {
+                       ledger_management.cards.get_card_data();
+                       if (response['status'] == 200) {
+                            $('#PrimaryCardModal').modal('hide');
+                       } else {
+                            var error = '';
+                            error = response['error'];
+                            $("input[name=primary-card]").prop( "disabled", false );
+                            $('#ledger_ui_add_card_message').html('<div class="alert alert-danger" role="alert">Error adding card, please check your details and try again. '+error+'</div>');                        
+                       }
+
+                       $("#save-primary-card-button").show();
+                       $("#save_primary_card_loader").hide();     
+                                             
+                    },
+                    error: function(error) {
+                        alert("Error Saving Primary Card");
+                    },
+                });    
+
+
+            },
+            display_cards: function() {
+                var html = "";
+                html += "<div class='row pt-3 pb-3 ps-5 pe-5'>";
+                // html += "<div class='col-1'>Primary Card</div><div class='col-8'>Card</div><div>Action</div>";
+                var primary_card_html = "";
+                
+                for (let i = 0; i < ledger_management.var.cards.length; i++) {
+                     primary_card_html = "";
+                     if (parseInt(ledger_management.var.primary_card_id) == parseInt(ledger_management.var.cards[i].id)) { 
+                        // primary_card_html = "<button class='btn btn-sm btn-danger'>PRIMARY CARD</button>";
+                        primary_card_html = '<i class="bi bi-check-circle-fill" style="font-size: 24px; color: #1cb352;">&nbsp;</i>';
+                     }
+                     
+		             html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;"+ledger_management.var.cards[i].card_type+" ending "+ledger_management.var.cards[i].last_digits+" with expiry "+ledger_management.var.cards[i].expiry_date+"</div><div class='col-1'>"+primary_card_html+"</div><div class='col-3 pt-1 text-end'><button class='btn btn-sm btn-primary m-1' onclick='ledger_management.cards.delete_card_confirm("+'"'+ledger_management.var.cards[i].id+'"'+");'>Remove Card</button></div>";
+                }
+                html += "</div>";
+
+                $('#div-ledger-ui-list-card-details').html(html);
+                $('#div-ledger-ui-card-details').show();
+                $('#div-ledger-ui-card-details-loader').hide();
+            },
+            init: function() {
+                var html = '';
+                var ledger_ui_card_details = $('#ledger_ui_card_details').length;
+                if (ledger_ui_card_details > 0) {                        
+                        html += "<div id='div-ledger-ui-card-details-loader'>"+ledger_management.var.pagesettings.loader+"</div>";
+                        html += "<div id='div-ledger-ui-card-details' class='row mx-md-n5 border p-2 ms-3 me-3 mb-3' style='display:none'>";
+                        html += "<div ><div class='col-12 text-end'><button class='btn btn-sm btn-primary m-1' id='primary-card-button'>Primary Card</button><button class='btn btn-sm btn-primary m-1' id='add-card-button'>Add Card</button></a></div></div>";
+                        html += "<div class='col-12' id='div-ledger-ui-list-card-details'></div>";
+                        html += "</div>";
+                        $('#ledger_ui_card_details').html(html);
+
+                        ledger_management.cards.get_card_data();
+                        ledger_management.cards.display_cards();
+
+                        $("#add-card-button").click(function() {
+                            $('#ledger_ui_add_card_message').html('');
+                            $('#id_number').val('');
+                            $('#id_expiry_month_0').val('');
+                            $('#id_expiry_month_1').val('');
+                            $('#id_ccv').val('');                            
+                            $('#AddNewCardModal').modal('show');
+                        });
+
+                        $("#save-card-button").click(function() {
+                            ledger_management.cards.save_card();
+                        });
+
+                        $("#save_card_loader").hide();
+                        $("#save_card_loader").html(ledger_management.var.pagesettings.button_loader);
+                        $("#save_primary_card_loader").hide();
+                        $("#save_primary_card_loader").html(ledger_management.var.pagesettings.button_loader);
+                        save_primary_card_loader
+                        $("#primary-card-button").click(function() {
+                            ledger_management.cards.primary_display_cards();
+                            $('#PrimaryCardModal').modal('show');
+                        });
+
+                        $("#save-primary-card-button").click(function() {
+                            $("input[name=primary-card]").prop( "disabled", false );
+                            ledger_management.cards.save_primary_card();
+                        });
+
+                        $('#delete_card_confirm_btn').click(function() {
+                              var delete_card_id = $('#delete_card_id').val();
+                              ledger_management.cards.delete_card(delete_card_id);
+                              $('#DeleteCardConfirmModal').modal('hide');
+                        });
+                        $('#nav-cards-tab-page').hide();
+
+                        $('.managed-account-nav').click(function() {
+                            $('.managed-account-nav').each(function(i, obj) {                               
+                                $("#"+obj.id+'-page').hide();
+                            });
+                            $("#"+this.id+'-page').show();                          
+                        });
+
+                }
+            }
+
+        }
 	
 }

@@ -24,6 +24,11 @@ urlpatterns = [
         url(r'^ledger-ui/api/get-account-details/(?P<user_id>[0-9]+)/', api.get_account_details, name='get-account-details'),
         url(r'^ledger-ui/api/update-account-details/(?P<user_id>[0-9]+)/', api.update_account_details, name='update-account-details'),
         url(r'^ledger-toolkit-api/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='ledger-api-invoice-pdf'),
+        url(r'^ledger-toolkit-api/get-card-tokens', api.get_card_tokens),
+        url(r'^ledger-toolkit-api/delete-card-token/(?P<card_token_id>[0-9]+)/', api.delete_card_token),
+        url(r'^ledger-toolkit-api/store-card/', api.store_card),
+        url(r'^ledger-toolkit-api/set-primary-card/', api.set_primary_card),
+        
 ]
 if settings.ENABLE_DJANGO_LOGIN is True:
     urlpatterns.append(url(r'^login/', LoginView.as_view(),name='login'))
