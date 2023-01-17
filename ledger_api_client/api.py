@@ -139,6 +139,7 @@ def process_zero(request):
         resp = "ERROR Attempting to connect payment gateway please try again later"
     return HttpResponse(resp, content_type='application/json')
 
+
 @csrf_exempt
 def process_no(request):
     jsondata = {'status': 404, 'message': 'API Key Not Found'}

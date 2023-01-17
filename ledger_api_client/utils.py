@@ -23,13 +23,11 @@ def create_basket_session(request, emailuser_id, parameters):
     #request to request.user.id for this function
     payment_session = None
     cookies = None 
-    print ('AQUI 3')
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
     no_payment = False
     no_payment_hash = ''
-    print ("AQUI 4")
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
     myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id,}
@@ -452,4 +450,24 @@ class FakeRequestSessionObj():
 
      def build_absolute_uri(self):
          return ''
+
+
+def process_create_future_invoice(basket_id, invoice_text):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/process_create_future_invoice/'+api_key+'/'
+    api_key = settings.LEDGER_API_KEY
+    myobj = {'basket_id': basket_id, 'invoice_text': invoice_text}
+    resp = ""
+    try:
+        api_resp = requests.post(url, data = myobj, cookies=cookies)
+        #print (api_resp.content)
+        resp = api_resp.json()
+    except Exception as e:
+        print (e)
+        resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
+    return resp
 
