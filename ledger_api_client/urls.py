@@ -10,6 +10,7 @@ from django.urls import path
 
 urlpatterns = [
         url(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
+        url(r'^ledger-api/pay-invoice/(?P<reference>\d+)/$', views.PayInvoice.as_view(), name='ledgergw-payment-invoice'),
         #url(r'^ledger-api/process-payment$', views.ProcessPaymentCheckout.as_view(), name='ledgergw-process-payment'),
         # api
         url(r'^ledger-api/get-card-tokens', api.get_card_tokens),
@@ -21,6 +22,7 @@ urlpatterns = [
         url(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
         url(r'^ledger-ui/api/get-settings/', api.get_settings, name='get-settings'),
         url(r'^ledger-ui/api/get-countries/', api.get_countries, name='get-settings'),
+
         url(r'^ledger-ui/api/get-account-details/(?P<user_id>[0-9]+)/', api.get_account_details, name='get-account-details'),
         url(r'^ledger-ui/api/update-account-details/(?P<user_id>[0-9]+)/', api.update_account_details, name='update-account-details'),
         url(r'^ledger-toolkit-api/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='ledger-api-invoice-pdf'),
