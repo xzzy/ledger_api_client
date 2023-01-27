@@ -13,6 +13,7 @@ from ledger_api_client import ledger_models
 from ledger_api_client import utils as ledger_api_client_utils
 from ledger_api_client.mixins import InvoiceOwnerMixin
 from django import forms
+import django
 from datetime import datetime, timedelta
 #from django.template import Template, Context,RequestContext
 #from django.template import loader
@@ -45,7 +46,9 @@ class PaymentDetailCheckout(TemplateView):
               no_payment_hash = request.session.get('no_payment_hash')
               basket_hash = request.session.get('basket_hash')
               basket_hash_split = basket_hash.split("|")
-
+              print ("B HHH")
+              print (basket_hash)
+              print (payment_session)
               basket_totals = ledger_api_client_utils.get_basket_total(basket_hash_split[0])
               if 'data' in basket_totals:
                   if 'basket_total' in basket_totals['data']:
@@ -72,6 +75,24 @@ class PaymentDetailCheckout(TemplateView):
         except Exception as e:
             context['data'] = render_to_string('payments/gateway-error.html', {'error': 'There was an error connecting to the Payment Gateway please try again later','settings': settings},)             
              #context['data'] = "There was error connecting to the Payment Gateway please try again later"
+        return render(request, self.template_name, context)
+
+
+class PayInvoice(TemplateView):
+    template_name = 'payments/pay-invoice.html'
+
+    def get(self, request, *args, **kwargs):
+        # if page is called with ratis_id, inject the ground_id
+
+        if request.user.is_staff is True:
+           # created as an exampe for testing purposes to generating a payment session for future invoices.
+           context = {'settings': settings}
+           invoice_reference = self.kwargs['reference']
+           return_url = settings.PARKSTAY_EXTERNAL_URL+'/success/'
+           fallback_url = settings.PARKSTAY_EXTERNAL_URL+'/fallback_url/'
+           payment_session = ledger_api_client_utils.generate_payment_session(request,invoice_reference, return_url, fallback_url)
+           context['data'] = payment_session
+
         return render(request, self.template_name, context)
 
 

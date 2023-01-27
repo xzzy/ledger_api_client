@@ -10,6 +10,7 @@ from babel.numbers import format_currency
 from django.utils.translation import get_language, to_locale
 from django.core.cache import cache
 from decimal import getcontext
+from django.urls import reverse
 
 def oracle_parser(): 
     pass
@@ -17,19 +18,86 @@ def oracle_parser():
 def update_payments():
     pass
 
+def generate_payment_session(request, invoice_reference, return_url, fallback_url):
+    context = {'settings': settings}
+    context['data'] = {} 
+    cookies = {}
+    myobj = {}
+    api_key = settings.LEDGER_API_KEY
+    url = None
+    payment_total = Decimal('0.00')
+    payment_session = None
+    basket_hash = ""
+    response = {'status': 500, 'data': {}, 'message': "Error creating payment session"}
+    django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
+
+    user_logged_in = None
+    is_authen = False
+    if django_version > 1.11:
+          is_authen = request.user.is_authenticated
+    else:
+          is_authen = request.user.is_authenticated()
+    if is_authen:
+           user_logged_in = request.user.id
+    if return_url.startswith('http') or return_url.startswith('https'):
+        pass
+    else:
+        response['status'] = 500
+        response['message'] = "return url missing http/https"
+        return response
+
+    if fallback_url.startswith('http') or fallback_url.startswith('https'):
+        pass
+    else:
+        response['status'] = 500
+        response['message'] = "fallback url missing http/https"
+        return response
+
+    myobj['user_logged_in'] = user_logged_in
+    myobj['return_url'] = return_url
+    myobj['fallback_url'] = fallback_url
+
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+    cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key}
+    try:
+        url = settings.LEDGER_API_URL+'/ledgergw/remote/get-basket-for-future-invoice/'+api_key+'/'+invoice_reference+'/'
+        resp_obj = requests.post(url, data=myobj, cookies=cookies)
+
+        resp = resp_obj.json()
+
+        if "data" in resp:
+            if "basket_hash" in resp["data"]:
+                  request.session['basket_hash'] = resp["data"]["basket_hash"]
+        for c in resp_obj.cookies:
+             if c.name ==  'sessionid':
+                 request.session['payment_session'] = c.value
+                 payment_session = request.session.get('payment_session')
+        response['status'] = 200
+        response['message'] = "Success"
+        response['payment_url'] = reverse('ledgergw-payment-details') 
+
+    except Exception as e:
+        response['status'] = 500
+        response['message'] = "Error creating payment session : "+str(e)
+        print (e)
+
+    return response
+
+
+
+
 def create_basket_session(request, emailuser_id, parameters):
     # emailuser_id use to be request vairable.  This has been 
     # replaced with the user objects.  You will need to change 
     #request to request.user.id for this function
     payment_session = None
     cookies = None 
-    print ('AQUI 3')
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           cookies = {'sessionid': payment_session}
     no_payment = False
     no_payment_hash = ''
-    print ("AQUI 4")
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create-basket-session/'+api_key+'/'
     myobj = {'parameters': json.dumps(parameters), 'emailuser_id': emailuser_id,}
@@ -452,4 +520,24 @@ class FakeRequestSessionObj():
 
      def build_absolute_uri(self):
          return ''
+
+
+def process_create_future_invoice(basket_id, invoice_text, return_preload_url):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/process_create_future_invoice/'+api_key+'/'
+    api_key = settings.LEDGER_API_KEY
+    myobj = {'basket_id': basket_id, 'invoice_text': invoice_text, 'return_preload_url' : return_preload_url}
+    resp = ""
+    try:
+        api_resp = requests.post(url, data = myobj, cookies=cookies)
+       
+        resp = api_resp.json()
+    except Exception as e:
+        print (e)
+        resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
+    return resp
 
