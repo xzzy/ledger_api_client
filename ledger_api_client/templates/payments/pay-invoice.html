@@ -1,0 +1,71 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+{% block header_top_menu %}
+<div id='ledger-payment-overtop'></div>
+{% endblock %}
+
+{% block extra_css %}
+ <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
+ {% endblock %}
+
+
+ {% block  top_menu %}
+ <li>
+	          <button type="button" class="btn btn-sm btn-secondary">
+			                    Notification 1 <span class="badge bg-danger">14</span>
+					             </button>
+ </li>
+
+ <li>
+	          <button type="button" class="btn btn-sm btn-secondary">
+			                    Notification 1 <span class="badge bg-danger">14</span>
+					             </button>
+
+ </li>
+
+ <li>
+	          <button type="button" class="btn btn-sm btn-secondary">
+			                    Notification 1 <span class="badge bg-danger">14</span>
+					             </button>
+
+ </li>
+
+ {% endblock %}
+
+
+
+{% block content %}
+    {% block page_content_inner_top %}{% endblock %}
+    <div class="">
+        <!-- Messages  -->
+        {% if messages %}
+        <div class="row">
+            <div class="col">
+                {% for message in messages %}
+                <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+                    {{ message|safe }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-lg-12">
+
+                <div id='content-payment-body'>
+                        {{ data|safe }}
+                </div>
+        </div>
+	<div class="col-lg-12">
+		<div id='content-payment-body'>
+			<a class='btn btn-lg btn-primary' href='{{ data.payment_url }}'>Pay Now</a>
+		</div>
+	</div>
+
+        <div class="row">
+            <div class="col">
+                {% block page_content_inner %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
