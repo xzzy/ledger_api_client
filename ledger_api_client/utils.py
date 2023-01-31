@@ -18,7 +18,7 @@ def oracle_parser():
 def update_payments():
     pass
 
-def generate_payment_session(request, invoice_reference, return_url, fallback_url):
+def generate_payment_session(request, invoice_reference, return_url, fallback_url, system_id):
     context = {'settings': settings}
     context['data'] = {} 
     cookies = {}
@@ -56,6 +56,7 @@ def generate_payment_session(request, invoice_reference, return_url, fallback_ur
     myobj['user_logged_in'] = user_logged_in
     myobj['return_url'] = return_url
     myobj['fallback_url'] = fallback_url
+    myobj['system_id'] = system_id
 
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
