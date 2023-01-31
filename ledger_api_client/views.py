@@ -90,7 +90,7 @@ class PayInvoice(TemplateView):
            invoice_reference = self.kwargs['reference']
            return_url = settings.PARKSTAY_EXTERNAL_URL+'/success/'
            fallback_url = settings.PARKSTAY_EXTERNAL_URL+'/fallback_url/'
-           payment_session = ledger_api_client_utils.generate_payment_session(request,invoice_reference, return_url, fallback_url, settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE)
+           payment_session = ledger_api_client_utils.generate_payment_session(request,invoice_reference, return_url, fallback_url)
            context['data'] = payment_session
 
         return render(request, self.template_name, context)
