@@ -324,7 +324,8 @@ def get_or_create(email):
     try:
         print (resp.text)
         resp_json = resp.json()
-    except:
+    except Exception as e:
+        print (e)
         resp_json = {}
     return resp_json
 
@@ -336,7 +337,8 @@ def get_organisation(organisation_id):
     resp_json = {}
     try:
         resp_json = resp.json()
-    except:
+    except Exception as e:
+        print (e)
         resp_json = {}
     return resp_json
 
@@ -348,7 +350,8 @@ def get_all_organisation():
     resp_json = {}
     try:
         resp_json = resp.json()
-    except:
+    except Exception as e:
+        print (e)
         resp_json = {}
     return resp_json
 
@@ -358,8 +361,7 @@ def get_search_organisation(organisation_name, organisation_abn):
     myobj = {'data': json.dumps({'organisation_name': organisation_name, 'organisation_abn': organisation_abn})}
     resp = requests.post(url, data=myobj)
     resp_json = {}
-    try:
-        print (resp.text)
+    try:        
         resp_json = resp.json()
         
     except Exception as e:
