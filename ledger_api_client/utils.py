@@ -340,6 +340,34 @@ def get_organisation(organisation_id):
         resp_json = {}
     return resp_json
 
+def get_all_organisation():
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_all_organisation/'+api_key+'/'
+    myobj = {'data': {}}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except:
+        resp_json = {}
+    return resp_json
+
+def get_search_organisation(organisation_name, organisation_abn):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_search_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps({'organisation_name': organisation_name, 'organisation_abn': organisation_abn})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:
+        print (resp.text)
+        resp_json = resp.json()
+        
+    except Exception as e:
+        print (e)
+        resp_json = {}
+    return resp_json
+
+
 def create_organisation(organisation_name, organisation_abn):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create_organisation/'+api_key+'/'
