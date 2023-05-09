@@ -39,6 +39,7 @@ if settings.ENABLE_DJANGO_LOGIN is True:
 
 urlpatterns.append(url(r'^logout/$', LogoutView.as_view(), {'next_page': '/'}, name='logout'))
 
+if settings.EMAIL_INSTANCE == 'DEV' or settings.EMAIL_INSTANCE == 'UAT'  or settings.EMAIL_INSTANCE == 'TEST':
+    # purpose of this is to not let search bot crawl dev/test/uat sites and prevent them from being index.
+    urlpatterns.append(url(r'^robots.txt',  views.RobotView.as_view(), name='robot_txt'))   
 
-#    print ("TYES")
-    #urlpatterns.append(path('login/', login, name='login'),)
