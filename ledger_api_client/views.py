@@ -103,6 +103,17 @@ class AccountsView(TemplateView):
         context = {'settings': settings}
         return render(request, self.template_name, context)
 
+class RobotView(TemplateView):
+
+    template_name = 'ledgerui/robot.txt'
+    
+    def get(self, request, *args, **kwargs):
+        context = {'settings': settings}
+
+        return render(request, self.template_name, context,content_type="text/plain")
+
+
+
 class InvoicePDFView(InvoiceOwnerMixin, generic.View):
     def get(self, request, *args, **kwargs):
         api_key = settings.LEDGER_API_KEY
