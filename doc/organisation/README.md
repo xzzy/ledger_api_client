@@ -1,5 +1,7 @@
 # Update Organisation Information. 
 
+This API can be used to update organisation information in LedgerGW.
+
 ```
 from ledger_api_client import
 
