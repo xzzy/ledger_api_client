@@ -19,6 +19,7 @@ urlpatterns = [
         url(r'^ledger-api/process-refund', api.process_refund),
         url(r'^ledger-api/process-zero', api.process_zero),
         url(r'^ledger-api/process-no', api.process_no),
+        url(r'^ledger-ui/accounts-firsttime',  views.AccountsFirstTimeView.as_view(), name='account-firstime'),
         url(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
         url(r'^ledger-ui/api/get-settings/', api.get_settings, name='get-settings'),
         url(r'^ledger-ui/api/get-countries/', api.get_countries, name='get-settings'),
