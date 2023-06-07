@@ -102,6 +102,13 @@ class AccountsView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = {'settings': settings}
         return render(request, self.template_name, context)
+    
+class AccountsFirstTimeView(TemplateView):
+
+    template_name = 'ledgerui/accounts_firsttime.html'
+    def get(self, request, *args, **kwargs):
+        context = {'settings': settings, 'firsttime': True}
+        return render(request, self.template_name, context)
 
 class RobotView(TemplateView):
 
