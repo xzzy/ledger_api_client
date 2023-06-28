@@ -49,6 +49,7 @@
 
 
 {% block content %}
+{% if request.session.is_authenticated %}
    <script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
    <input type='hidden' value='{{ csrf_token }}' id='ledger_ui_csrf_token' >
    <div class="container">
@@ -313,9 +314,19 @@ ledger_management.init({{ request.user.id }});
 </div>
 {% endif %}
 
-
 {% block accounts_message_bottom %}
 {% endblock %}
+
+
+{% else %}  
+  <div class="container">
+    <BR>
+    <div class='alert alert-danger'>
+      Your are currently not logged. Please login to access this page.
+    </div>
+  </div>
+{% endif %}
+
 </div>
 {% endblock %}
 

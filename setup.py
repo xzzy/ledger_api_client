@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='ledger_api_client',
-      version='1.25',
+      version='1.26',
       description='Ledger API Client',
       url='https://github.com/dbca-wa/ledger_api_client',
       author='Department of Parks and Wildlife',
