@@ -546,8 +546,9 @@ def get_system_group_user_by_name(system_group_name):
         system_groups = managed_models.SystemGroup.objects.filter(name=system_group_name)
         for sg in system_groups:
             for u in managed_models.SystemGroupPermission.objects.filter(system_group=sg,active=True):
-                permission_list.append({"id":u.id, "emailuser_id" : u.emailuser.id,})
-                cache.set(cache_name_pl,json.dumps(permission_list), 86400)
+                if u.emailuser:
+                    permission_list.append({"id":u.id, "emailuser_id" : u.emailuser.id,})
+            cache.set(cache_name_pl,json.dumps(permission_list), 86400)
     else:
         permission_list = json.loads(pl_cache)
 
