@@ -4,7 +4,9 @@ from django.conf import settings
 from decimal import Decimal
 import django
 import requests
-import json 
+import json
+import base64
+import mimetypes
 from decimal import InvalidOperation
 from babel.numbers import format_currency
 from django.utils.translation import get_language, to_locale
@@ -596,3 +598,33 @@ def process_create_future_invoice(basket_id, invoice_text, return_preload_url):
         resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
     return resp
 
+def update_ledger_oracle_invoice(ledger_invoice_number, oracle_invoice_number, oracle_invoice_file_local):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+
+    extension = None
+    if oracle_invoice_file_local[-4:-3] == '.':
+        extension  = oracle_invoice_file_local[-3:]
+    elif oracle_invoice_file_local[-5:-4] == '.':
+        extension  = oracle_invoice_file_local[-4:]
+
+    # Python Convert PDF to Base64 String
+    with open(oracle_invoice_file_local, "rb") as OracleInvoiceFile:
+        oracle_invoice_file_base64 = base64.b64encode(OracleInvoiceFile.read())    
+    
+    oifb64_url  = "data:"+mimetypes.types_map['.'+str(extension.lower())]+";base64,"+oracle_invoice_file_base64.decode("ascii")
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/update_ledger_oracle_invoice/'+api_key+'/'
+    api_key = settings.LEDGER_API_KEY
+    
+    myobj = {'ledger_invoice_number': ledger_invoice_number, 'oracle_invoice_number': oracle_invoice_number, 'oracle_invoice_file_base64' : oifb64_url, 'extension': extension,}
+    resp = ""
+    try:
+        api_resp = requests.post(url, data = myobj, cookies=cookies)        
+        resp = api_resp.json()        
+    except Exception as e:
+        print (e)
+        resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
+    return resp
