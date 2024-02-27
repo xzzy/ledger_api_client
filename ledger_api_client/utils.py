@@ -628,3 +628,19 @@ def update_ledger_oracle_invoice(ledger_invoice_number, oracle_invoice_number, o
         print (e)
         resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
     return resp
+
+
+
+def get_ledger_totals():
+    ledger_totals = {"total_failed": 0}
+    try: 
+       data_file = settings.BASE_DIR+"/datasets/ledger-totals.json"
+       f = open(settings.BASE_DIR+"/datasets/ledger-totals.json", "r")
+       dumped_data = f.read()
+       f.close()
+       ledger_import_totals = json.loads(dumped_data)
+       ledger_totals["total_failed"] = ledger_import_totals['refund_total']
+    except:
+       print ("error opening ledger totals")
+
+    return ledger_totals
