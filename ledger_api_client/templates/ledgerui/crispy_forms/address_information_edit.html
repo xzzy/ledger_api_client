@@ -1,0 +1,23 @@
+{% load crispy_forms_tags %}
+
+{% block page_content_inner %}
+<div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">  
+    {% if save_success is  True %}
+        <div class="alert alert-success update-alert">Successfully Updated</div>
+        <script>
+            $('.update-alert').delay(5000).fadeOut(400);
+            system_ledger_management.load_address_details();
+            setTimeout(function() {                
+                $('#id_create_edit_address_information_modal').modal('hide');
+                
+                
+            }, 2000);
+        </script>
+    {% else %}      
+    
+    <form name='address_information_edit' id='id_address_information_edit' class="form-horizontal" action="/ledger-ui/crispy-form/address-information/{{ system_user_id }}/edit/{{ pk }}" method="post" onsubmit="event.preventDefault();ledger_api_django_crispy_forms.submit_form(this.id,'id_create_edit_address_information')">
+        {% crispy form %}
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

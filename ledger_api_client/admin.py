@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from django.contrib.admin import register, ModelAdmin
 from ledger_api_client import models
 from ledger_api_client import managed_models
-
+from ledger_api_client import ledger_models
 
 #@admin.register(managed_models.SystemGroupPermission)
 class SystemGroupPermissionInline(admin.TabularInline):
@@ -21,13 +21,59 @@ class SystemGroupAdmin(ModelAdmin):
     list_display = ('id','name',)
     inlines = [SystemGroupPermissionInline]
 
-#@admin.register(models.EmailUser)
-#class EmailAdmin(ModelAdmin):
-#    list_display = ('id', 'first_name','last_name','is_staff','is_superuser','ledger_id',)
-#    list_filter = ('is_staff','is_superuser',)
-#    search_fields = ('first_name','last_name','id','ledger_id')
-#
-#@admin.register(models.DataStore)
-#class DataStoreAdmin(ModelAdmin):
-#     list_display = ('id','key_name')
+@admin.register(managed_models.SystemUser)
+class SystemuserAdmin(ModelAdmin):
+    list_display = ('id','legal_first_name','legal_last_name')    
+    raw_id_fields = ('ledger_id',)
+
+    def save_model(self, request, obj, form, change):
+
+        # Need to create this way to ledger_id being in a different database.
+        if obj.pk is None:
+            eu= ledger_models.EmailUserRO.objects.get(id=obj.ledger_id.id)
+            su = managed_models.SystemUser.objects.create(  ledger_id=eu,
+                                                            first_name=obj.first_name,
+                                                            last_name=obj.last_name,
+                                                            legal_first_name=obj.legal_first_name,
+                                                            legal_last_name=obj.legal_last_name,
+                                                            is_staff=obj.is_staff,
+                                                            is_active=obj.is_active,
+                                                            title=obj.title,
+                                                            dob=obj.dob,
+                                                            legal_dob=obj.legal_dob,
+                                                            phone_number=obj.phone_number,
+                                                            mobile_number=obj.mobile_number,
+                                                            fax_number=obj.fax_number,                                                          
+                                                          )
+        else:
+            super().save_model(request, obj, form, change)
+
+@admin.register(managed_models.SystemUserAddress)
+class SystemUserAddressAdmin(ModelAdmin):
+    list_display = ('id','system_user','address_type','line1','locality','postcode','state','country')    
+    raw_id_fields = ('system_user',)
+
+    # def save_model(self, request, obj, form, change):
+
+    #     # Need to create this way to ledger_id being in a different database.
+    #     if obj.pk is None:
+    #         eu= ledger_models.EmailUserRO.objects.get(id=obj.ledger_id.id)
+    #         su = managed_models.SystemUser.objects.create(  ledger_id=eu,
+    #                                                         first_name=obj.first_name,
+    #                                                         last_name=obj.last_name,
+    #                                                         legal_first_name=obj.legal_first_name,
+    #                                                         legal_last_name=obj.legal_last_name,
+    #                                                         is_staff=obj.is_staff,
+    #                                                         is_active=obj.is_active,
+    #                                                         title=obj.title,
+    #                                                         dob=obj.dob,
+    #                                                         legal_dob=obj.legal_dob,
+    #                                                         phone_number=obj.phone_number,
+    #                                                         mobile_number=obj.mobile_number,
+    #                                                         fax_number=obj.fax_number,                                                          
+    #                                                       )
+    #     else:
+    #         super().save_model(request, obj, form, change)
+
+
 

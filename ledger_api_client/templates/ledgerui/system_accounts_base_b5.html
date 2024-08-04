@@ -49,8 +49,9 @@
 
 
 {% block content %}
+
 {% if request.session.is_authenticated %}
-   <script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
+
    <input type='hidden' value='{{ csrf_token }}' id='ledger_ui_csrf_token' >
    <div class="container">
     <div class="">
@@ -114,6 +115,7 @@
   </div>
   <div class="card-body collapse show" id='ledger_ui_account_details-card-body'>
      <div id="ledger_ui_account_details"></div>
+     <div id="ledger_ui_personal_details"></div>
   </div>
 </div>
 <br>
@@ -158,8 +160,7 @@
     </div>
   </div>
   <div class="card-body" id='ledger_ui_address-card-body'>
-     <div id="ledger_ui_residential_details"></div>
-     <div id="ledger_ui_postal_details"></div>
+     <div id="ledger_ui_address_details"></div>     
   </div>
 </div>
 
@@ -190,9 +191,6 @@
         </div>
     </div>
    </div>
-<script>
-ledger_management.init({{ request.user.id }});
-</script>
 
 {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
 
@@ -313,6 +311,31 @@ ledger_management.init({{ request.user.id }});
   </div>
 </div>
 
+<script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script type="text/javascript" src="/static/ledger_api/js/system_ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script type="text/javascript" src="/static/ledger_api/js/ledger_api_django_crispy_forms.js?ver={{ GIT_COMMIT_HASH }}"></script>
+
+<script>
+    system_ledger_management.var.system_user_id = '{{system_user_id}}';
+    system_ledger_management.var.ledger_user_id = '{{ledger_user_id}}';
+    system_ledger_management.init();
+</script>
+
+	   
+<div class="modal fade" id="id_create_edit_address_information_modal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="AddressModalLabel">Create Address</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id='id_create_edit_address_information'>
+        No Information Loaded
+      </div>
+
+    </div>
+  </div>
+</div>
 
 {% endif %}
 
