@@ -148,7 +148,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                  try:
                     is_authenticated = request.user.is_authenticated
                     request.session['is_authenticated'] = is_authenticated
-                    user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name, 'is_staff': request.user.is_staff, 'last_login':datetime.datetime.now()}
+                    user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name, 'is_staff': request.user.is_staff}
                     request.session['user_obj'] = user_obj
                     su = managed_models.SystemUser.objects.filter(ledger_id=request.user.id)
                     if su.count() > 0:                        
