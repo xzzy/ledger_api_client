@@ -6,7 +6,7 @@ from django.utils.deprecation import MiddlewareMixin
 import urllib.request, json
 import urllib.parse
 from django.contrib import messages
-from confy import env
+# from confy import env
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from ledger_api_client import managed_models
 import datetime
