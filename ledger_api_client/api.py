@@ -2,17 +2,28 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string, get_template
 from rest_framework.decorators import api_view
+from rest_framework import viewsets, serializers, status, generics, views
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication 
+from ledger_api_client.mixins import AccountManagementPermissionMixin
 from django.conf import settings
 from django.template.loader import render_to_string
 from ledger_api_client import utils as ledger_api_client_utils
+from ledger_api_client import managed_models
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 import datetime
 import json
 import requests 
 import django
 import urllib.request, json
 import urllib.parse
+import traceback
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
 
 @csrf_exempt
 #@api_view(['POST'])
@@ -568,3 +579,121 @@ def update_account_details(request,user_id):
     return HttpResponse(json.dumps(resp), content_type='application/json')
 
 
+class SystemUserAccountsList(AccountManagementPermissionMixin, views.APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, BasicAuthentication]
+    def enforce_csrf(self, *args, **kwargs):
+        '''
+        Bypass the CSRF checks altogether
+        '''
+        pass       
+    def clean_string(self,value):
+        if value is None:
+            value = ""
+        return value
+    def post(self,request,format=None):
+        print ("LOADING")
+        # response = HttpResponse(json.dumps({"test": "test"}), content_type='application/json')    
+        # return response
+        try:
+            http_status = status.HTTP_200_OK
+            report = None
+            pass
+            is_auth = True
+            if is_auth is True:
+            # if helpers.is_account_admin(self.request.user) is True:
+                request_body_json = json.loads(request.body.decode("utf-8"))                
+                page_length = request_body_json['length']                 
+                row_start = request_body_json['start']
+                draw = request_body_json['draw']
+                order_column_id = ''
+                order_direction = ''
+                if len(request_body_json['order']) > 0:
+                    order_column_id = request_body_json['order'][0]['column']
+                    order_direction = request_body_json['order'][0]['dir']
+
+                order_dir = ""
+                if order_direction == 'desc':
+                    order_dir= "-"
+
+                order_by = ["id",]
+                if order_column_id == 0:
+                    order_by = [order_dir+'id',]
+                if order_column_id == 1:
+                    order_by = [order_dir+'first_name', order_dir+'last_name']
+                if order_column_id == 2:
+                    order_by = [order_dir+'legal_first_name', order_dir+'legal_last_name']               
+                if order_column_id == 3:
+                    order_by = [order_dir+'legal_dob',]                                        
+                if order_column_id == 4:
+                    order_by = [order_dir+'email',]
+
+                active = True
+                if "active" in request_body_json:
+                    active = request_body_json['active']
+                search_value = request_body_json['search']['value']
+
+                query = Q()
+                query &= Q(is_active=active)
+                
+                if search_value:
+                    if len(search_value) > 0:
+                        if search_value.isnumeric() is True:
+                            query &= Q(            
+                                Q(id=search_value)
+                                | Q(phone_number__icontains=search_value)
+                                | Q(mobile_number__icontains=search_value)
+                            )
+                        else:
+                            query &= Q(
+                                Q(first_name__icontains=search_value) 
+                                | Q(last_name__icontains=search_value)
+                                | Q(legal_first_name__icontains=search_value)
+                                | Q(legal_last_name__icontains=search_value)
+                                | Q(email__icontains=search_value)
+                          
+
+                            )
+
+                accounts_array= []
+                accounts_total = managed_models.SystemUser.objects.all().count()                
+                accounts_filtered = managed_models.SystemUser.objects.filter(query).count() 
+                accounts_obj = managed_models.SystemUser.objects.filter(query).order_by(*order_by)[row_start:row_start+page_length]
+
+                for acc in accounts_obj:
+                    account_row = {}
+                    account_row["id"] = acc.id
+                    account_row["account_name"] = self.clean_string(acc.first_name) +' '+ self.clean_string(acc.last_name)
+                    
+                    account_row["legal_name"] = self.clean_string(acc.legal_first_name) + ' '+self.clean_string(acc.legal_last_name)                    
+                    
+                    account_row["legal_dob"] = ""
+                    if acc.legal_dob:
+                        account_row["legal_dob"] = acc.legal_dob.strftime("%d/%m/%Y")
+        
+                    account_row["email"] = acc.email
+                    account_row["action"] = "<a class='btn btn-primary btn-sm' href='/ledger-ui/accounts-management/"+str(acc.id)+"/change/'>Change</a>"
+                    accounts_array.append(account_row)
+                
+
+
+                # Generate Users
+                dt_obj = {  "draw": draw,
+                            "recordsTotal": accounts_total,
+                            "recordsFiltered": accounts_filtered,                    
+                            "data" : accounts_array
+                        }
+                
+                
+                
+                if dt_obj:
+                    response = HttpResponse(json.dumps(dt_obj), content_type='application/json')
+                    return response
+                else:
+                    raise serializers.ValidationError('No report was generated.')
+            else:
+                 raise serializers.ValidationError('Access Forbidden')
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            traceback.print_exc()
+            raise serializers.ValidationError(str(e))        

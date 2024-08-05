@@ -3,7 +3,8 @@ import traceback
 from django.db import models, transaction
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField, IntegerRangeField
+# from django.contrib.postgres.fields import JSONField, IntegerRangeField
+from django.db.models import JSONField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser #PermissionsMixin
 from django.utils import timezone
 from django.db import models
@@ -36,17 +37,18 @@ from django.core.exceptions import ValidationError
 class LedgerDBRouter(object):
 
     def db_for_read(self, model, **hints):
-       if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions':
-           return 'ledger_db'
-       if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
-           return 'ledger_db'
+         
+        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions':
+            return 'ledger_db'
+        if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
+            return 'ledger_db'
 
-       if model._meta.db_table == 'django_migrations':
-            return 'default'
-           
+        if model._meta.db_table == 'django_migrations':
+                return 'default'
+        
 
-       #or model._meta.db_table == 'django_admin_log'
-       return None
+        #or model._meta.db_table == 'django_admin_log'
+        return None
 
     def db_for_write(self, model, **hints):
         """
@@ -60,8 +62,12 @@ class LedgerDBRouter(object):
         """
         Allow relations if a model in the events app is involved.
         """
+        print (obj1._meta.db_table)
+        print (obj2._meta.db_table)
         if 'accounts_emailuser' == obj1._meta.db_table and  'parkstay_campgroundgroup_members' == obj2._meta.db_table:
              return True
+        if 'accounts_emailuser' == obj1._meta.db_table and  'ledger_api_client_systemuser' == obj2._meta.db_table:            
+            return True
         if 'accounts_emailuser' == obj1._meta.db_table:
             return True
         if 'auth_group' == obj1._meta.db_table:
@@ -69,7 +75,7 @@ class LedgerDBRouter(object):
         if 'auth_permission' == obj1._meta.db_table:
             return True
         if 'django_content_type' == obj1._meta.db_table:
-            return True
+            return True            
         return None
 
 
@@ -630,9 +636,9 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
 
     residential_address = models.ForeignKey(Address, null=True, blank=False, related_name='+', on_delete=models.DO_NOTHING)
     postal_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
-    postal_same_as_residential = models.NullBooleanField(default=False) 
+    postal_same_as_residential = models.BooleanField(default=False, null=True, blank=True) 
     billing_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
-    billing_same_as_residential = models.NullBooleanField(default=False)
+    billing_same_as_residential = models.BooleanField(default=False, null=True, blank=True)
 
     identification = models.ForeignKey(Document, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document')
     identification2 = models.ForeignKey(PrivateDocument, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document_2')

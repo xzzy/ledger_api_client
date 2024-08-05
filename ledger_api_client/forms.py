@@ -1,0 +1,249 @@
+from __future__ import unicode_literals
+from django.urls import reverse
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div, Button
+from crispy_forms.bootstrap import FormActions, InlineRadios
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select
+from django_countries.fields import CountryField
+from django_countries.data import COUNTRIES
+from django import forms
+from ledger_api_client import managed_models
+
+class BaseFormHelper(FormHelper):
+    form_class = 'form-horizontal'
+    label_class = 'col-xs-12 col-sm-4 col-md-3 col-lg-2'
+    field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-4'
+
+class FullBaseFormHelper(FormHelper):
+    form_class = 'form-horizontal'
+    label_class = 'col-xs-12 col-sm-4 col-md-3 col-lg-2'
+    field_class = 'col-xs-12 col-sm-8 col-md-9 col-lg-10'
+
+class ButtonBaseFormHelper(FormHelper):
+    form_class = 'form-horizontal'
+    label_class = 'col-xs-0 col-sm-0 col-md-0 col-lg-0'
+    field_class = 'col-xs-12 col-sm-12 col-md-12 col-lg-12'
+
+
+class PopupFormHelper(FormHelper):
+    form_class = 'form-horizontal popup-form'
+    label_class = 'col-xs-12 col-sm-4 col-md-3 col-lg-3'
+    field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-6'
+
+
+class PersonalInformationUpdateForm(ModelForm):
+    
+    class Meta:
+        model = managed_models.SystemUser
+        fields = ['legal_first_name','legal_last_name','legal_dob']
+
+    def __init__(self, *args, **kwargs):
+        super(PersonalInformationUpdateForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.helper.field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-6'
+        # self.helper.form_tag = False
+        self.fields['legal_first_name'].required = True
+        self.fields['legal_last_name'].required = True
+        self.fields['legal_dob'].widget = forms.DateInput(format='%d/%m/%Y')
+        self.fields['legal_dob'].input_formats=['%d/%m/%Y']
+        self.fields['legal_dob'].required = True
+        self.fields['legal_dob'].widget.attrs['class'] = 'bs-datepicker'        
+
+        crispy_boxes = Layout()
+        if self.initial['account_change_locked'] is True:
+            self.fields['legal_first_name'].widget = HiddenInput()
+            self.fields['legal_last_name'].widget = HiddenInput()
+            self.fields['legal_dob'].widget = HiddenInput()
+
+            crispy_boxes.append('legal_first_name')
+            crispy_boxes.append('legal_last_name')
+            crispy_boxes.append('legal_dob')        
+           
+            legal_dob_string = ''
+            if self.initial['legal_dob']:
+                legal_dob_string = self.initial['legal_dob'].strftime("%d/%m/%Y")
+            crispy_boxes.append(HTML('<div id="div_id_legal_dob_display" class="mb-3 row"> <label for="id_legal_dob" class="col-form-label col-xs-12 col-sm-4 col-md-3 col-lg-2 requiredField">Legal Given name(s) </label> <div class="col-xs-12 col-sm-8 col-md-6 col-lg-6"> <span id="input-ledger-ui-given-name" class="form-control" style="background-color:#efefef; height: 37px;">'+self.initial['legal_first_name']+'<span></div> </div>'))
+            crispy_boxes.append(HTML('<div id="div_id_legal_dob_display" class="mb-3 row"> <label for="id_legal_dob" class="col-form-label col-xs-12 col-sm-4 col-md-3 col-lg-2 requiredField">Legal Last name </label> <div class="col-xs-12 col-sm-8 col-md-6 col-lg-6"> <span id="input-ledger-ui-given-name" class="form-control" style="background-color:#efefef; height: 37px;">'+self.initial['legal_last_name']+'<span></div> </div>'))
+            crispy_boxes.append(HTML('<div id="div_id_legal_dob_display" class="mb-3 row"> <label for="id_legal_dob" class="col-form-label col-xs-12 col-sm-4 col-md-3 col-lg-2 requiredField">Legal date of birth</label> <div class="col-xs-12 col-sm-8 col-md-6 col-lg-6"> <span id="input-ledger-ui-given-name" class="form-control" style="background-color:#efefef; height: 37px;">'+legal_dob_string+'<span></div> </div>'))
+            # crispy_boxes.append(HTML("<label>Legal Given Name(s)</label><div class='p-1'>{}</div>".format(self.initial['legal_first_name'])))
+            # crispy_boxes.append(HTML("<label>Legal Last Name</label><div class='p-1'>{}</div>".format(self.initial['legal_last_name'])))            
+            # crispy_boxes.append(HTML("<label>Legal DOB</label><div class='p-1'>{}</div>".format(self.initial['legal_dob'])))            
+            
+        else:        
+            crispy_boxes.append('legal_first_name')
+            crispy_boxes.append('legal_last_name')       
+            crispy_boxes.append('legal_dob')
+     
+            self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', css_id="id_personal_information_btn"))
+        self.helper.layout = Layout(crispy_boxes)
+
+    def clean_legal_last_name(self):
+        cleaned_data = self.clean()
+        legal_last_name = cleaned_data.get('legal_last_name')
+        if legal_last_name is None:
+            raise forms.ValidationError('Please provide a valid last name.')
+        elif len(legal_last_name) < 2:
+            raise forms.ValidationError('Please provide a valid last name.')
+        return legal_last_name
+
+    def clean_legal_first_name(self):
+        cleaned_data = self.clean()
+        legal_first_name = cleaned_data.get('legal_first_name')
+        if legal_first_name is None:
+            raise forms.ValidationError('Please provide a valid first name.')
+        elif len(legal_first_name) < 2:
+            raise forms.ValidationError('Please provide a valid first name.')
+        return legal_first_name
+
+class ContactInformationUpdateForm(ModelForm):
+
+    class Meta:
+        model = managed_models.SystemUser
+        fields = ['phone_number','mobile_number',]
+
+    def __init__(self, *args, **kwargs):
+        super(ContactInformationUpdateForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.helper.field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-6'  
+        self.fields['mobile_number'].required = True      
+        self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', css_id="id_contact_information_btn"))
+
+    def clean_mobile_number(self):
+        cleaned_data = self.clean()
+        mobile_number = cleaned_data.get('mobile_number')
+        if mobile_number:
+            if len(mobile_number) < 10:
+                raise forms.ValidationError('Please provide a valid mobile phone number')        
+        else:
+            raise forms.ValidationError('Please provide a valid mobile phone number')
+        return mobile_number
+    
+    def clean_phone_number(self):
+        cleaned_data = self.clean()
+        phone_number = cleaned_data.get('phone_number')
+        if phone_number:
+            if len(phone_number) < 10:
+                raise forms.ValidationError('Please provide a valid phone number')        
+        return phone_number    
+    
+
+class AddressInformationUpdateForm(ModelForm):
+
+    class Meta:
+        model = managed_models.SystemUserAddress
+        fields = [ 'address_type','country','line1','line2','line3','locality','postcode','state']
+
+    def __init__(self, *args, **kwargs):
+        super(AddressInformationUpdateForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.helper.field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-6'  
+        self.fields['address_type'].required = True      
+        self.fields['country'].required = True  
+        self.fields['line1'].required = True  
+        self.fields['locality'].required = True  
+        self.fields['postcode'].required = True  
+        self.fields['state'].required = True  
+
+        self.helper.add_input(Submit('Save', 'Save', css_class='btn-lg', css_id="id_contact_information_btn"))
+
+
+class AddressInformationDeleteForm(ModelForm):
+
+    class Meta:
+        model = managed_models.SystemUserAddress
+        fields = []
+
+    def __init__(self, *args, **kwargs):
+        super(AddressInformationDeleteForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.helper.field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-6'  
+        
+        self.helper.add_input(Submit('Delete', 'Delete', css_class='btn-lg btn-danger', css_id="id_delete_information_btn"))
+        self.helper.add_input(Button('Cancel', 'cancel', css_class='btn-lg btn-primary cancel-address', css_id="id_cancel_information_btn"))
+
+
+
+class SystemUserForm(forms.ModelForm):
+    
+    # identification2 = FileField(label='Upload Identification', required=False, max_length=128, widget=AjaxFileUploader(attrs={'single':'single'})) 
+
+    class Meta:
+        model = managed_models.SystemUser
+        # fields = ['email', 'first_name', 'last_name','legal_first_name','legal_last_name', 'title','position_title','manager_name','manager_email', 'dob', 'legal_dob', 'phone_number', 'mobile_number', 'fax_number','identification2','is_staff','is_active']
+        fields = ['email', 'first_name', 'last_name','legal_first_name','legal_last_name', 'title', 'legal_dob', 'phone_number', 'mobile_number', 'fax_number','account_change_locked','is_staff','is_active']
+
+    def __init__(self, *args, **kwargs):
+        
+        email_required = kwargs.pop('email_required', True)
+
+        super(SystemUserForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        crispy_boxes = Div()
+
+
+        for f in self.fields:            
+            self.fields[f].widget.attrs['class'] = 'form-control'
+            self.fields[f].widget.attrs['label_class'] = 'form-control'
+            if f == 'first_name':                
+                self.fields[f].widget = HiddenInput()
+            if f == 'last_name':
+                self.fields[f].widget = HiddenInput()
+            if f == 'email':                
+                self.fields[f].widget = HiddenInput()
+            if f == 'position_title':
+                self.fields[f].widget = HiddenInput()
+            if f == 'manager_name':
+                self.fields[f].widget = HiddenInput()    
+            if f == 'manager_email':
+                self.fields[f].widget = HiddenInput()
+            if f == 'is_active':
+                self.fields[f].widget.attrs['class'] = 'form-check-input'
+                self.fields[f].help_text = ''
+            if f == 'is_staff':
+                self.fields[f].widget.attrs['class'] = 'form-check-input'
+                self.fields[f].help_text = ''
+            if f == 'account_change_locked':
+                self.fields[f].widget.attrs['class'] = 'form-check-input'
+                self.fields[f].help_text = ''                
+
+                
+
+        self.helper.add_input(Submit('save', 'Save', css_class='btn-lg'))
+        self.helper.add_input(Submit('cancel', 'Cancel', css_class='btn-lg btn-danger'))
+
+        person_id = self.initial['id']
+        self.fields['email'].required = email_required
+
+        # some form renderers use widget's is_required field to set required attribute for input element
+        self.fields['email'].widget.is_required = email_required
+
+        crispy_boxes.append(HTML("<label>Email</label><div class='p-1'>{}</div>".format(self.initial['email'])))
+        crispy_boxes.append(HTML("<label>Given Name(s)</label><div class='p-1'>{}</div>".format(self.initial['first_name'])))
+        crispy_boxes.append(HTML("<label>Last Name</label><div class='p-1'>{}</div>".format(self.initial['last_name'])))
+        # crispy_boxes.append(HTML("<input type='hidden' value='{}' name='file_group' id='file_group'>".format('1')))
+        # crispy_boxes.append(HTML("<input type='hidden' value='{}' name='file_group_ref_id' id='file_group_ref_id'>".format(str(person_id))))
+
+        crispy_boxes.append('first_name')
+        crispy_boxes.append('last_name')
+
+        crispy_boxes.append('email')
+        crispy_boxes.append('legal_first_name')
+        crispy_boxes.append('legal_last_name')
+        crispy_boxes.append('title')
+        crispy_boxes.append('dob')
+        crispy_boxes.append('legal_dob')
+        crispy_boxes.append('phone_number')
+        crispy_boxes.append('mobile_number')
+        crispy_boxes.append('fax_number')
+        # crispy_boxes.append('identification2')
+        crispy_boxes.append(HTML("<BR>"))
+        crispy_boxes.append('account_change_locked')
+        crispy_boxes.append('is_staff')
+        crispy_boxes.append('is_active')
+        
+        crispy_boxes.append(HTML("<BR>"))
+
+        self.helper.layout = Layout(crispy_boxes)
