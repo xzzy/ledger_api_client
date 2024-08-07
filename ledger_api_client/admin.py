@@ -18,7 +18,7 @@ class SystemGroupPermissionInline(admin.TabularInline):
 
 @admin.register(managed_models.SystemGroup)
 class SystemGroupAdmin(ModelAdmin):
-    list_display = ('id','name',)
+    list_display = ('id','name','description')
     inlines = [SystemGroupPermissionInline]
 
 @admin.register(managed_models.SystemUser)

@@ -143,6 +143,15 @@ class SystemAccountsFirstTimeView(LoginRequiredMixin, TemplateView):
     template_name = 'ledgerui/system_accounts_firsttime.html'
     def get(self, request, *args, **kwargs):
         context = {'settings': settings, 'firsttime': True}
+        if request.user.is_authenticated is True:
+            su = managed_models.SystemUser.objects.filter(ledger_id=request.user.id)
+            if su.count() > 0:
+                system_user_id = su[0].id 
+            else:
+                su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email, first_name=request.user.first_name, last_name=request.user.last_name)
+                system_user_id = su.id
+            context['system_user_id'] = system_user_id
+            context['ledger_user_id'] = request.user.id    
         return render(request, self.template_name, context)
 
 # System Accounts Page 
