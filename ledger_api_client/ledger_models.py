@@ -62,8 +62,6 @@ class LedgerDBRouter(object):
         """
         Allow relations if a model in the events app is involved.
         """
-        print (obj1._meta.db_table)
-        print (obj2._meta.db_table)
         if 'accounts_emailuser' == obj1._meta.db_table and  'parkstay_campgroundgroup_members' == obj2._meta.db_table:
              return True
         if 'accounts_emailuser' == obj1._meta.db_table and  'ledger_api_client_systemuser' == obj2._meta.db_table:            
