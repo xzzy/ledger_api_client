@@ -282,7 +282,7 @@ NOTIFICATION_EMAIL=decouple.config('NOTIFICATION_EMAIL', default='')
 BPAY_GATEWAY = decouple.config('BPAY_GATEWAY', default=None)
 INVOICE_UNPAID_WARNING = decouple.config('INVOICE_UNPAID_WARNING', default='')
 # GST Settings
-LEDGER_GST = decouple.config('LEDGER_GST',default=10)
+LEDGER_GST = decouple.config('LEDGER_GST',default=10, cast=int)
 # BPAY settings
 BPAY_ALLOWED = decouple.config('BPAY_ALLOWED',default=True, cast=bool)
 BPAY_BILLER_CODE=decouple.config('BPAY_BILLER_CODE', default=None)
