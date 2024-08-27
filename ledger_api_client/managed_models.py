@@ -91,7 +91,7 @@ class SystemUser(models.Model):
     """Custom authentication model for the ledger project.
     Password and email are required. Other fields are optional.
     """
-    ledger_id = models.ForeignKey(EmailUser, on_delete=models.DO_NOTHING, db_constraint=False, blank=True, null=True,unique=True)
+    ledger_id = models.OneToOneField(EmailUser, on_delete=models.DO_NOTHING, db_constraint=False, blank=True, null=True)
     email = models.EmailField(unique=True, blank=False, default=None)
     first_name = models.CharField(max_length=128, blank=False, verbose_name='Given name(s)')
     last_name = models.CharField(max_length=128, blank=False, verbose_name='Last name')
