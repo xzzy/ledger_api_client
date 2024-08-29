@@ -24,7 +24,7 @@ LEDGER_UI_URL=decouple.config('LEDGER_UI_URL',default='http://localhost/')
 
 # Application definitions
 SECRET_KEY = decouple.config('SECRET_KEY')
-DEBUG = decouple.config('DEBUG', False)
+DEBUG = decouple.config('DEBUG', False, cast=bool)
 CSRF_COOKIE_SECURE = decouple.config('CSRF_COOKIE_SECURE', False)
 SESSION_COOKIE_SECURE = decouple.config('SESSION_COOKIE_SECURE', False)
 if DEBUG:
