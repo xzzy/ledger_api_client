@@ -4,6 +4,7 @@ import decouple
 import sys
 import dj_database_url
 import os
+import json
 
 # Project paths
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -30,7 +31,9 @@ SESSION_COOKIE_SECURE = decouple.config('SESSION_COOKIE_SECURE', False)
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
-    ALLOWED_HOSTS = decouple.config('ALLOWED_HOSTS', [])
+    ALLOWED_HOSTS_STRING = decouple.config("ALLOWED_HOSTS", default='[""]')
+    ALLOWED_HOSTS = json.loads(ALLOWED_HOSTS_STRING)   
+   
 WSGI_APPLICATION = 'ledger.wsgi.application'
 INSTALLED_APPS = [
     'django.contrib.admin',
