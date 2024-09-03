@@ -191,6 +191,9 @@ class SystemUserAddress(models.Model):
     postcode = models.CharField(max_length=10, blank=True, null=True)
     state = models.CharField(max_length=255, default='WA', blank=True, null=True)
     country = CountryField(default='AU', blank=True, null=True)
+    use_for_postal = models.BooleanField(default=False)   
+    use_for_billing = models.BooleanField(default=False)
+    system_address_link = models.IntegerField(blank=True, null=True)
     
     def __str__(self):
         return '{} {} {} {} {}'.format(self.line1, self.locality, self.state,self.country,self.postcode)
