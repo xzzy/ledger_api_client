@@ -10,10 +10,15 @@ var ledger_api_django_crispy_forms = {
             console.log("FORMID"+form_id);
             var form_element = $("input, textarea, select", this);
             form_element.each(function(){
-                console.log(this.name);
-                console.log(this.value);
-                console.log(this.id);   
-                form_payload[this.name]  = this.value;
+                // console.log(this.name);
+                // console.log(this.value);
+                // console.log(this.id);   
+
+                if (this.type == 'checkbox') {                     
+                    form_payload[this.name]  = $(this).prop('checked');
+                } else {
+                    form_payload[this.name]  = this.value;
+                }
                 if (this.name == 'csrfmiddlewaretoken') {
                     csrf_token = this.name;
 

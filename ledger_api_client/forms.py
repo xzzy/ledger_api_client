@@ -134,7 +134,7 @@ class AddressInformationUpdateForm(ModelForm):
 
     class Meta:
         model = managed_models.SystemUserAddress
-        fields = [ 'address_type','country','line1','line2','line3','locality','postcode','state']
+        fields = [ 'address_type','country','line1','line2','line3','locality','postcode','state','use_for_postal','use_for_billing']
 
     def __init__(self, *args, **kwargs):
         super(AddressInformationUpdateForm, self).__init__(*args, **kwargs)

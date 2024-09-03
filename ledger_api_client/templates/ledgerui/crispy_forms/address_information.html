@@ -6,16 +6,16 @@
         {% if sua_residential_count > 0 %} 
             <div class='col-3 fw-bolder'>Street</div>
             <div class='col-2 fw-bolder'>Locality</div>
-            <div class='col-2 fw-bolder'>State</div>
+            <div class='col-1 fw-bolder'>State</div>
             <div class='col-2 fw-bolder'>Postcode</div>
             <div class='col-2 fw-bolder'>Country</div>
-            <div class='col-1 fw-bolder'></div>        
+            <div class='col-2 fw-bolder'></div>        
             {% for sua in system_user_address %} 
                 {% if sua.address_type == 'residential_address' %}
                     <div class='col-3'>{{ sua.line1 }}</div>
                     <div class='col-2'>{{ sua.locality }}</div>
-                    <div class='col-2'>{{ sua.state }}</div>
-                    <div class='col-1'>{{ sua.postcode }}</div>
+                    <div class='col-1'>{{ sua.state }}</div>
+                    <div class='col-2'>{{ sua.postcode }}</div>
                     <div class='col-2'>{{ sua.country }}</div>
                     <div class='col-2 text-end p-1'>
                         <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
@@ -37,20 +37,23 @@
             {% if sua_postal_count > 0 %} 
             <div class='col-3 fw-bolder'>Street</div>
             <div class='col-2 fw-bolder'>Locality</div>
-            <div class='col-2 fw-bolder'>State</div>
+            <div class='col-1 fw-bolder'>State</div>
             <div class='col-2 fw-bolder'>Postcode</div>
             <div class='col-2 fw-bolder'>Country</div>
-            <div class='col-1 fw-bolder'></div>                
+            <div class='col-2 fw-bolder'></div>                
                 {% for sua in system_user_address %} 
                     {% if sua.address_type == 'postal_address' %}                   
                         <div class='col-3'>{{ sua.line1 }}</div>
                         <div class='col-2'>{{ sua.locality }}</div>
-                        <div class='col-2'>{{ sua.state }}</div>
-                        <div class='col-1'>{{ sua.postcode }}</div>
+                        <div class='col-1'>{{ sua.state }}</div>
+                        <div class='col-2'>{{ sua.postcode }}</div>
                         <div class='col-2'>{{ sua.country }}</div>       
-                        <div class='col-2 text-end p-1'>
-                            <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
-                            <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                        <div class='col-2 text-end p-1'>                            
+                            {% if sua.system_address_link > 0 %}
+                            {% else %}                            
+                                <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
+                                <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                            {% endif %}
                         </div>                                                
                     {% endif %}
                 {% endfor %}  
@@ -66,20 +69,23 @@
             {% if sua_billing_count > 0 %}        
             <div class='col-3 fw-bolder'>Street</div>
             <div class='col-2 fw-bolder'>Locality</div>
-            <div class='col-2 fw-bolder'>State</div>
+            <div class='col-1 fw-bolder'>State</div>
             <div class='col-2 fw-bolder'>Postcode</div>
             <div class='col-2 fw-bolder'>Country</div>
-            <div class='col-1 fw-bolder'></div>    
+            <div class='col-2 fw-bolder'></div>    
                 {% for sua in system_user_address %} 
                     {% if sua.address_type == 'billing_address' %}                    
                         <div class='col-3'>{{ sua.line1 }}</div>
                         <div class='col-2'>{{ sua.locality }}</div>
-                        <div class='col-2'>{{ sua.state }}</div>
-                        <div class='col-1'>{{ sua.postcode }}</div>
+                        <div class='col-1'>{{ sua.state }}</div>
+                        <div class='col-2'>{{ sua.postcode }}</div>
                         <div class='col-2'>{{ sua.country }}</div>                    
-                        <div class='col-2 text-end p-1'>
-                            <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
-                            <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                        <div class='col-2 text-end p-1'>                            
+                            {% if sua.system_address_link > 0 %}
+                            {% else %}
+                                <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
+                                <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endfor %}            

@@ -299,8 +299,6 @@ class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
     
     def get_context_data(self, **kwargs):
         context = super(AddressInformationCreate, self).get_context_data(**kwargs)   
-        print (self.kwargs)     
-        print (kwargs)
         context['pk'] = self.kwargs.get('pk')
         context['save_success'] = self.save_success
         context['request'] = self.request
@@ -323,18 +321,41 @@ class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
 
     def form_valid(self, form):        
         self.object = form.save(commit=False)
-        forms_data = form.cleaned_data
-        print ("FORM SAVE")
+        forms_data = form.cleaned_data        
         pk = self.kwargs.get('pk')
-        print (pk)
+        
         su = managed_models.SystemUser.objects.filter(id=int(pk))
         if su.count() > 0:
             self.object.system_user = su[0]
-            print ("USER DOUNF")
-            print (self.object.system_user)
 
         self.kwargs.get('pk')
-        self.object.save()       
+        self.object.save()
+
+        if self.object.use_for_postal is True:
+            managed_models.SystemUserAddress.objects.create(system_user=su[0], 
+                                                            address_type='postal_address',
+                                                            line1=self.object.line1,
+                                                            line2=self.object.line2,
+                                                            line3=self.object.line3,
+                                                            locality=self.object.locality,
+                                                            postcode=self.object.postcode,
+                                                            state=self.object.state,
+                                                            country=self.object.country,
+                                                            system_address_link=self.object.id
+                                                            )
+        if self.object.use_for_billing is True:
+            managed_models.SystemUserAddress.objects.create(system_user=su[0], 
+                                                            address_type='billing_address',
+                                                            line1=self.object.line1,
+                                                            line2=self.object.line2,
+                                                            line3=self.object.line3,
+                                                            locality=self.object.locality,
+                                                            postcode=self.object.postcode,
+                                                            state=self.object.state,
+                                                            country=self.object.country,
+                                                            system_address_link=self.object.id
+                                                            )                                                                                    
+
         self.save_success = True
         return render(self.request, self.template_name, self.get_context_data())  
 
@@ -374,14 +395,73 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
     def form_valid(self, form):        
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
-        print ("FORM SAVE")
         pk = self.kwargs.get('pk')
-        print (pk)
         su = managed_models.SystemUser.objects.filter(id=int(pk))
+        print ("HERE 1")
+        print (su.count())
         if su.count() > 0:
             self.object.system_user = su[0]
-            
             print (self.object.system_user)
+
+            print (self.object.use_for_postal)
+            print ("HERE")
+        if self.object.use_for_postal is True:
+            print ("PST")
+            if managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').count() > 0: 
+                sua = managed_models.SystemUserAddress.objects.get(system_address_link=self.object.id,address_type='postal_address')
+                sua.system_user = self.object.system_user
+                sua.line1 = self.object.line1
+                sua.line2 = self.object.line2
+                sua.line3 = self.object.line3
+                sua.locality = self.object.locality
+                sua.postcode = self.object.postcode
+                sua.state = self.object.state
+                sua.country = self.object.country
+                sua.save()
+            else:
+                managed_models.SystemUserAddress.objects.create(system_user=self.object.system_user,
+                                                                address_type='postal_address',                                                            
+                                                                line1=self.object.line1,
+                                                                line2=self.object.line2,
+                                                                line3=self.object.line3,
+                                                                locality=self.object.locality,
+                                                                postcode=self.object.postcode,
+                                                                state=self.object.state,
+                                                                country=self.object.country,
+                                                                system_address_link=self.object.id
+                                                                )       
+        else:
+            print ("DETYETE")
+            sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').delete()
+    
+
+        if self.object.use_for_billing is True:
+
+            if managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address').count() > 0: 
+                sua = managed_models.SystemUserAddress.objects.get(system_address_link=self.object.id,address_type='billing_address')
+                sua.system_user = self.object.system_user
+                sua.line1 = self.object.line1
+                sua.line2 = self.object.line2
+                sua.line3 = self.object.line3
+                sua.locality = self.object.locality
+                sua.postcode = self.object.postcode
+                sua.state = self.object.state
+                sua.country = self.object.country
+                sua.save()     
+            else:
+                managed_models.SystemUserAddress.objects.create(system_user=self.object.system_user,
+                                            address_type='billing_address',                                            
+                                            line1=self.object.line1,
+                                            line2=self.object.line2,
+                                            line3=self.object.line3,
+                                            locality=self.object.locality,
+                                            postcode=self.object.postcode,
+                                            state=self.object.state,
+                                            country=self.object.country,
+                                            system_address_link=self.object.id
+                                            )                   
+        else:
+            sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address').delete()                         
 
         self.kwargs.get('pk')
         self.object.save()       
@@ -400,8 +480,7 @@ class AddressInformationDelete(SystemUserAddressPermissionMixin,generic.UpdateVi
     
     def get_context_data(self, **kwargs):
         context = super(AddressInformationDelete, self).get_context_data(**kwargs)   
-        print (self.kwargs)     
-        print (kwargs)
+
         context['pk'] = self.kwargs.get('pk')
         context['system_user_id'] = self.kwargs.get('system_user_id')
         context['save_success'] = self.save_success
@@ -418,7 +497,7 @@ class AddressInformationDelete(SystemUserAddressPermissionMixin,generic.UpdateVi
         return initial
 
     def post(self, request, *args, **kwargs):
-        print (request.POST)
+
         # if request.POST.get('Cancel'):
         #     print ("CANCELLING")
         #     return HttpResponse("<script>$('#id_create_edit_address_information_modal').modal('hide');</script>")
@@ -429,8 +508,9 @@ class AddressInformationDelete(SystemUserAddressPermissionMixin,generic.UpdateVi
     def form_valid(self, form):        
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
-        print ("FROM DELETE")
-        print (self.object.id)
+
+        sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').delete()
+        sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address').delete()
         self.object.delete()
         # managed_models.SystemUserAddress.objects.filter(id=self.object.id).delete()                
         self.save_success = True
