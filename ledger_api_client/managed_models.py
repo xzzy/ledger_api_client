@@ -144,12 +144,15 @@ class SystemUser(models.Model):
             return '{}'.format(self.ledger_id_id)      
 
     def save(self, *args, **kwargs):
-        print ("CHANGE SYSTEM USER")
-        print (self.id)
+ 
+
         if self.id is None:
 
             super(SystemUser, self).save(*args, **kwargs)
             system_user_old = SystemUser.objects.get(email=self.email)
+            if not self.change_by_user_id:
+                self.change_by_user_id = system_user_old.id
+
             SystemUserChangeLog.objects.create(systemuser=self,
                                             change_key='email',
                                             change_value=str(self.email),
@@ -245,8 +248,7 @@ class SystemUser(models.Model):
                                             )         
 
         else:
-
-            print ("CHANGING DATA")
+ 
             if self.change_by_user_id is None:
                 """
                 su = SystemUser
@@ -255,7 +257,8 @@ class SystemUser(models.Model):
                 su.first_name = "Bob"
                 su.save()
                 """
-                raise ValidationError("Change User ID not provided, Please provide before changing any user data")       
+                raise ValidationError("Change User ID not provided, Please provide before changing any user data")    
+
             system_user_old = SystemUser.objects.get(id=self.id)
             super(SystemUser, self).save(*args, **kwargs)
             if system_user_old.email != self.email:
