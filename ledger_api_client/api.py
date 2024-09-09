@@ -697,3 +697,113 @@ class SystemUserAccountsList(AccountManagementPermissionMixin, views.APIView):
         except Exception as e:
             traceback.print_exc()
             raise serializers.ValidationError(str(e))        
+        
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
+
+class SystemUserAccountsLogsList(views.APIView,AccountManagementPermissionMixin):
+    authentication_classes = [CsrfExemptSessionAuthentication, BasicAuthentication]
+    def enforce_csrf(self, *args, **kwargs):
+        '''
+        Bypass the CSRF checks altogether
+        '''
+        pass
+
+    def clean_string(self,value):
+        if value is None:
+            value = ""
+        return value                
+    def post(self,request,pk, format=None):
+ 
+        try:
+            http_status = status.HTTP_200_OK
+            report = None
+            # if helpers.is_account_admin(self.request.user) is True:                
+            request_body_json = json.loads(request.body.decode("utf-8"))
+            
+            page_length = request_body_json['length']                 
+            row_start = request_body_json['start']
+            draw = request_body_json['draw']       
+
+            order_column_id = ''
+            order_direction = ''
+            if len(request_body_json['order']) > 0:
+                order_column_id = request_body_json['order'][0]['column']
+                order_direction = request_body_json['order'][0]['dir']   
+
+            order_dir = ""
+            if order_direction == 'desc':
+                order_dir= "-"
+
+            query = Q()
+            order_by = ["id",]
+            if order_column_id == 0:
+                order_by = [order_dir+'id',]
+            if order_column_id == 1:
+                order_by = [order_dir+'change_key',]
+            if order_column_id == 2:
+                order_by = [order_dir+'change_value',]
+            if order_column_id == 3:
+                order_by = [order_dir+'change_by',]   
+            if order_column_id == 4:
+                order_by = [order_dir+'created',]                    
+
+
+            search_value = request_body_json['search']['value']
+
+            query = Q(systemuser_id=pk)            
+            if search_value:
+                if len(search_value) > 0:
+                    if search_value.isnumeric() is True:
+                        query &= Q(            
+                            Q(id=search_value)
+                        )
+                    else:
+                        query &= Q(
+                            Q(change_key__icontains=search_value) 
+                            | Q(change_value__icontains=search_value)                                                          
+                        )
+
+
+            accounts_log_array= []
+            accounts_log_total = managed_models.SystemUserChangeLog.objects.all().count()                
+            accounts_log_filtered = managed_models.SystemUserChangeLog.objects.filter(query).count() 
+            accounts_log_obj = managed_models.SystemUserChangeLog.objects.filter(query).order_by(*order_by)[row_start:row_start+page_length]
+            for acc in accounts_log_obj:
+                account_log_row = {}
+                account_log_row["id"] = acc.id
+                account_log_row["systemuser"] = self.clean_string(acc.systemuser.first_name) +' '+ self.clean_string(acc.systemuser.last_name)
+                account_log_row["change_key"] = acc.change_key
+                account_log_row["change_value"] = acc.change_value
+                if acc.change_by:
+                    account_log_row["change_by"] = self.clean_string(acc.change_by.first_name) +' '+ self.clean_string(acc.change_by.last_name) + ' ({})'.format(acc.change_by.id)
+                else:
+                    account_log_row["change_by"] = ''
+                account_log_row["created"]  = acc.created.astimezone().strftime("%d %b %Y %H:%M %p")
+                accounts_log_array.append(account_log_row)
+
+            # Generate Users
+            dt_obj = {  "draw": draw,
+                        "recordsTotal": accounts_log_total,
+                        "recordsFiltered": accounts_log_filtered,                    
+                        "data" : accounts_log_array
+                    }
+            
+            if dt_obj:
+                response = HttpResponse(json.dumps(dt_obj), content_type='application/json')
+                return response
+            else:
+                raise serializers.ValidationError('No data was generated.')                
+            # else:
+            #     raise serializers.ValidationError('Access Forbidden')                                    
+
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            traceback.print_exc()
+            raise serializers.ValidationError(str(e))                                                            

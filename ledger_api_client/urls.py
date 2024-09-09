@@ -12,6 +12,7 @@ from django.urls import path
 urlpatterns = [
         re_path(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
         re_path(r'^ledger-api/pay-invoice/(?P<reference>\d+)/$', views.PayInvoice.as_view(), name='ledgergw-payment-invoice'),
+        
         #url(r'^ledger-api/process-payment$', views.ProcessPaymentCheckout.as_view(), name='ledgergw-process-payment'),
         # api
         re_path(r'^ledger-api/get-card-tokens', api.get_card_tokens),
@@ -23,6 +24,8 @@ urlpatterns = [
 
         # System Admin Account Management
         re_path(r'^ledger-admin-api/accounts-management/list',  api.SystemUserAccountsList.as_view(), name='accounts-management-list'),
+        re_path(r'^ledger-admin-api/system-account/logs/(?P<pk>\d+)$', api.SystemUserAccountsLogsList.as_view(),name='ledger-system-user-account-logs'),
+
         re_path(r'^ledger-ui/accounts-management/(?P<pk>\d+)/change',  views.SystemAccountChange.as_view(), name='accounts-management-change'),
         re_path(r'^ledger-ui/accounts-management',  views.AccountsManagementView.as_view(), name='accounts-management'),        
 
@@ -33,6 +36,7 @@ urlpatterns = [
         # System Account Management - Store Personal Information in local system database but maintain link to ledger account id
         re_path(r'^ledger-ui/system-accounts-firsttime',  views.SystemAccountsFirstTimeView.as_view(), name='system-account-firstime'),
         re_path(r'^ledger-ui/system-accounts',  views.SystemAccountsView.as_view(), name='system-account'),
+        
 
         # Crispy Forms
         re_path(r'^ledger-ui/crispy-form/account-information/(?P<pk>[0-9]+)/',  views.AccountInformationView.as_view(), name='system-account-information'), 

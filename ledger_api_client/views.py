@@ -18,6 +18,9 @@ from ledger_api_client import forms as ledger_api_client_form
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django import forms
+# from rest_framework import serializers, status, views as rest_views
+# from rest_framework.authentication import SessionAuthentication, BasicAuthentication 
+import traceback
 
 import django
 from datetime import datetime, timedelta
@@ -431,7 +434,7 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
                                                                 system_address_link=self.object.id
                                                                 )       
         else:
-            print ("DETYETE")
+            
             sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').delete()
     
 
@@ -585,11 +588,11 @@ class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
         if request.POST.get('cancel'):            
             return HttpResponseRedirect(self.get_absolute_url())
 
-        first_name  = request.POST.get('first_name', '')
-        last_name = request.POST.get('last_name', '')
+        # first_name  = request.POST.get('first_name', '')
+        # last_name = request.POST.get('last_name', '')
         
-        if len(first_name) < 1 and len(last_name) < 1:             
-            messages.error(self.request, "No Given name or last name data")
+        # if len(first_name) < 1 and len(last_name) < 1:             
+        #     messages.error(self.request, "No Given name or last name data")
 
         return super(SystemAccountChange, self).post(request, *args, **kwargs)
 
@@ -628,7 +631,8 @@ class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
             #         print (e)
 
             
-            
+            su = managed_models.SystemUser.objects.get(ledger_id=self.request.user.id)
+            self.object.change_by_user_id = su.id            
             self.object.save()
             # if identification2_filechanged is True:
             #     EmailUserChangeLog.objects.create(emailuser=self.object, change_key="identification2", change_value=str(self.object.identification2.id) + ":" +self.object.identification2.name,change_by=self.request.user)
