@@ -152,12 +152,14 @@ class SSOLoginMiddleware(MiddlewareMixin):
                     request.session['user_obj'] = user_obj
                     su = managed_models.SystemUser.objects.filter(ledger_id=request.user.id)
                     if su.count() > 0:                        
-                        su = managed_models.SystemUser.objects.get(id=su[0])
-                        su.first_name = request.user.first_name
-                        su.last_name.last_name = request.user.last_name
-                        su.email = request.user.email
-                        su.last_login = datetime.datetime.now()                        
-                        su.save()                        
+                        su_obj = managed_models.SystemUser
+                        su_obj.change_by_user_id = su.id
+                        suo = su_obj.objects.get(id=su[0])
+                        suo.first_name = request.user.first_name
+                        suo.last_name.last_name = request.user.last_name
+                        suo.email = request.user.email
+                        suo.last_login = datetime.datetime.now()                        
+                        suo.save()                        
                     else:
                         su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email ,first_name=request.user.first_name, last_name=request.user.last_name, is_active=True, last_login=datetime.datetime.now())
 

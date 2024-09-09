@@ -209,7 +209,12 @@ class SystemUserForm(forms.ModelForm):
                 self.fields[f].widget.attrs['class'] = 'form-check-input'
                 self.fields[f].help_text = ''                
 
-                
+
+        self.fields['first_name'].required = False
+        self.fields['last_name'].required = False
+        self.fields['legal_dob'].widget = forms.DateInput(format='%d/%m/%Y')
+        self.fields['legal_dob'].input_formats=['%d/%m/%Y']        
+        self.fields['legal_dob'].widget.attrs['class'] = 'bs-datepicker'                 
 
         self.helper.add_input(Submit('save', 'Save', css_class='btn-lg'))
         self.helper.add_input(Submit('cancel', 'Cancel', css_class='btn-lg btn-danger'))
@@ -233,7 +238,7 @@ class SystemUserForm(forms.ModelForm):
         crispy_boxes.append('legal_first_name')
         crispy_boxes.append('legal_last_name')
         crispy_boxes.append('title')
-        crispy_boxes.append('dob')
+        # crispy_boxes.append('dob')
         crispy_boxes.append('legal_dob')
         crispy_boxes.append('phone_number')
         crispy_boxes.append('mobile_number')

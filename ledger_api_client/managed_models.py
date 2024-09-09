@@ -87,14 +87,18 @@ class SystemGroupPermission(models.Model):
             return str(self.system_group)
 
 
+
+
 class SystemUser(models.Model):
     """Custom authentication model for the ledger project.
     Password and email are required. Other fields are optional.
     """
+    change_by_user_id = None
+
     ledger_id = models.OneToOneField(EmailUser, on_delete=models.DO_NOTHING, db_constraint=False, blank=True, null=True)
     email = models.EmailField(unique=True, blank=False, default=None)
-    first_name = models.CharField(max_length=128, blank=False, verbose_name='Given name(s)')
-    last_name = models.CharField(max_length=128, blank=False, verbose_name='Last name')
+    first_name = models.CharField(max_length=128, blank=True, null=True, verbose_name='Given name(s)')
+    last_name = models.CharField(max_length=128, blank=True, null=True, verbose_name='Last name')
 
     legal_first_name = models.CharField(max_length=128, null=True, blank=True, verbose_name='Legal Given name(s)')
     legal_last_name = models.CharField(max_length=128, null=True, blank=True, verbose_name='Legal Last name')
@@ -129,32 +133,7 @@ class SystemUser(models.Model):
     legal_dob = models.DateField(auto_now=False, auto_now_add=False, null=True, blank=True, verbose_name="Legal date of birth", help_text='')
     phone_number = models.CharField(max_length=50, null=True, blank=True, verbose_name="phone number", help_text='')  
     mobile_number = models.CharField(max_length=50, null=True, blank=True, verbose_name="mobile number", help_text='')
-    fax_number = models.CharField(max_length=50, null=True, blank=True, verbose_name="fax number", help_text='')
-
-    # residential_address = models.ForeignKey(Address, null=True, blank=False, related_name='+')
-    # postal_address = models.ForeignKey(Address, null=True, blank=True, related_name='+')
-    # postal_same_as_residential = models.NullBooleanField(default=False) 
-    # billing_address = models.ForeignKey(Address, null=True, blank=True, related_name='+')
-    # billing_same_as_residential = models.NullBooleanField(default=False)
-
-    # identification = models.ForeignKey(Document, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document')
-    # identification2 = models.ForeignKey(PrivateDocument, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document_2')
-
-    # senior_card = models.ForeignKey(Document, null=True, blank=True, on_delete=models.SET_NULL, related_name='senior_card')
-    # senior_card2 = models.ForeignKey(PrivateDocument, null=True, blank=True, on_delete=models.SET_NULL, related_name='senior_card')
-
-    # def save(self, *args, **kwargs):
-    #     print (self.ledger_id.id)
-    #     print (self.pk)
-    #     # if self.pk is None:
-    #     #     System               
-    #     super(SystemUser, self).save(*args, **kwargs)
-    
-    # def create(self, *args, **kwargs):
-    #     self.through_defaults=None
-    #     print ("CREATE")
-    #     super(SystemUser, self).save(*args, **kwargs)
-    
+    fax_number = models.CharField(max_length=50, null=True, blank=True, verbose_name="fax number", help_text='')   
 
     def __str__(self):
         if self.legal_first_name:                        
@@ -163,6 +142,220 @@ class SystemUser(models.Model):
             if self.first_name:
                 return '{} {}'.format(self.first_name, self.last_name)
             return '{}'.format(self.ledger_id_id)      
+
+    def save(self, *args, **kwargs):
+        print ("CHANGE SYSTEM USER")
+        print (self.id)
+        if self.id is None:
+
+            super(SystemUser, self).save(*args, **kwargs)
+            system_user_old = SystemUser.objects.get(email=self.email)
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='email',
+                                            change_value=str(self.email),
+                                            change_by_id=self.change_by_user_id
+                                            )
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='first_name',
+                                            change_value=str(self.first_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='last_name',
+                                            change_value=str(self.last_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='legal_first_name',
+                                            change_value=str(self.legal_first_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='legal_last_name',
+                                            change_value=str(self.legal_last_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='account_change_locked',
+                                            change_value=str(self.account_change_locked),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='is_staff',
+                                            change_value=str(self.is_staff),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='is_active',
+                                            change_value=str(self.is_active),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='title',
+                                            change_value=str(self.title),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='legal_dob',
+                                            change_value=str(self.legal_dob),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='phone_number',
+                                            change_value=str(self.phone_number),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='mobile_number',
+                                            change_value=str(self.mobile_number),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='fax_number',
+                                            change_value=str(self.fax_number),
+                                            change_by_id=self.change_by_user_id
+                                            )         
+
+        else:
+
+            print ("CHANGING DATA")
+            if self.change_by_user_id is None:
+                """
+                su = SystemUser
+                su.change_by_user_id = 9   # this should be set to the user id of the person making the change and is needed for change log records
+                su.objects.get(id=8)
+                su.first_name = "Bob"
+                su.save()
+                """
+                raise ValidationError("Change User ID not provided, Please provide before changing any user data")       
+            system_user_old = SystemUser.objects.get(id=self.id)
+            super(SystemUser, self).save(*args, **kwargs)
+            if system_user_old.email != self.email:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='email',
+                                            change_value=str(self.email),
+                                            change_by_id=self.change_by_user_id
+                                            )
+            if system_user_old.first_name != self.first_name:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='first_name',
+                                            change_value=str(self.first_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+            if system_user_old.last_name != self.last_name:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='last_name',
+                                            change_value=str(self.last_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+            if system_user_old.legal_first_name != self.legal_first_name:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='legal_first_name',
+                                            change_value=str(self.legal_first_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+            if system_user_old.legal_last_name != self.legal_last_name:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='legal_last_name',
+                                            change_value=str(self.legal_last_name),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+            if system_user_old.account_change_locked != self.account_change_locked:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='account_change_locked',
+                                            change_value=str(self.account_change_locked),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+            if system_user_old.is_staff != self.is_staff:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='is_staff',
+                                            change_value=str(self.is_staff),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            if system_user_old.is_active != self.is_active:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='is_active',
+                                            change_value=str(self.is_active),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            if system_user_old.title != self.title:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='title',
+                                            change_value=str(self.title),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            if system_user_old.legal_dob != self.legal_dob:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='legal_dob',
+                                            change_value=str(self.legal_dob),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            if system_user_old.phone_number != self.phone_number:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='phone_number',
+                                            change_value=str(self.phone_number),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            if system_user_old.mobile_number != self.mobile_number:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='mobile_number',
+                                            change_value=str(self.mobile_number),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+            if system_user_old.fax_number != self.fax_number:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='fax_number',
+                                            change_value=str(self.fax_number),
+                                            change_by_id=self.change_by_user_id
+                                            )            
+
+
+
+
 
 class SystemUserAddress(models.Model):
 
@@ -199,3 +392,12 @@ class SystemUserAddress(models.Model):
         return '{} {} {} {} {}'.format(self.line1, self.locality, self.state,self.country,self.postcode)
 
 
+class SystemUserChangeLog(models.Model):
+    systemuser = models.ForeignKey(SystemUser, related_name='change_log_system_user', on_delete=models.DO_NOTHING)
+    change_key = models.CharField(max_length=1024, blank=True, null=True)
+    change_value = models.CharField(max_length=1024, blank=True, null=True)
+    change_by = models.ForeignKey(SystemUser, related_name='change_log_request_user', blank=True, null=True, on_delete=models.DO_NOTHING)
+    created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    class Meta:        
+        ordering = ['-created']
