@@ -213,8 +213,12 @@ class PersonalInformationUpdate(SystemUserPermissionMixin, generic.UpdateView):
         return super(PersonalInformationUpdate, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        self.object = form.save()
+        self.object = form.save(commit=False)
         forms_data = form.cleaned_data
+
+        su = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id)                
+        self.object.change_by_user_id = su[0].id
+                                                        
         self.object.save()       
         self.save_success = True
         return render(self.request, self.template_name, self.get_context_data())        
@@ -256,8 +260,12 @@ class ContactInformationUpdate(SystemUserPermissionMixin,generic.UpdateView):
         return super(ContactInformationUpdate, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):        
-        self.object = form.save()
+        self.object = form.save(commit=False)
         forms_data = form.cleaned_data
+        
+        su = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id)                
+        self.object.change_by_user_id = su[0].id
+
         self.object.save()       
         self.save_success = True
         return render(self.request, self.template_name, self.get_context_data())        
