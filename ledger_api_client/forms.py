@@ -149,6 +149,32 @@ class AddressInformationUpdateForm(ModelForm):
 
         self.helper.add_input(Submit('Save', 'Save', css_class='btn-lg', css_id="id_contact_information_btn"))
 
+    def clean_postcode(self):
+        cleaned_data = self.clean()
+        postcode = cleaned_data.get('postcode')
+        country = cleaned_data.get('country')
+        if country == 'AU':            
+            if postcode:
+                if len(postcode) != 4:
+                    raise forms.ValidationError('Invalid postcode for australia')        
+        return postcode
+                
+    def clean_state(self):
+        cleaned_data = self.clean()
+        state = cleaned_data.get('state')
+        country = cleaned_data.get('country')
+        if country == 'AU':
+            state = state.upper()
+            if state:
+                if  state == "ACT" or state == "NSW" or state == "NT" or state == "QLD" or state == "SA" or state == "TAS" or state == "VIC" or state == "WA":                    
+                    pass
+                else:
+                    raise forms.ValidationError('Invalid state for australia,  inputs accepted (ACT,NSW,NT,QLD,SA,TAS,VIC,WA) ')                   
+        return state 
+
+
+       
+
 
 class AddressInformationDeleteForm(ModelForm):
 
@@ -164,7 +190,20 @@ class AddressInformationDeleteForm(ModelForm):
         self.helper.add_input(Submit('Delete', 'Delete', css_class='btn-lg btn-danger', css_id="id_delete_information_btn"))
         self.helper.add_input(Button('Cancel', 'cancel', css_class='btn-lg btn-primary cancel-address', css_id="id_cancel_information_btn"))
 
+class SystemUserCreateForm(forms.ModelForm):
 
+    class Meta:
+        model = managed_models.SystemUser
+        # fields = ['email', 'first_name', 'last_name','legal_first_name','legal_last_name', 'title','position_title','manager_name','manager_email', 'dob', 'legal_dob', 'phone_number', 'mobile_number', 'fax_number','identification2','is_staff','is_active']
+        fields = ['email',]
+
+    def __init__(self, *args, **kwargs):
+        super(SystemUserCreateForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg btn-primary', css_id="id_create_user_btn"))
+        self.helper.field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-6'  
+            
+            
 
 class SystemUserForm(forms.ModelForm):
     
@@ -215,6 +254,7 @@ class SystemUserForm(forms.ModelForm):
         self.fields['legal_dob'].widget = forms.DateInput(format='%d/%m/%Y')
         self.fields['legal_dob'].input_formats=['%d/%m/%Y']        
         self.fields['legal_dob'].widget.attrs['class'] = 'bs-datepicker'                 
+        self.fields['legal_dob'].widget.attrs['autocomplete'] = 'off'
 
         self.helper.add_input(Submit('save', 'Save', css_class='btn-lg'))
         self.helper.add_input(Submit('cancel', 'Cancel', css_class='btn-lg btn-danger'))

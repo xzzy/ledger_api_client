@@ -27,6 +27,7 @@ urlpatterns = [
         re_path(r'^ledger-admin-api/system-account/logs/(?P<pk>\d+)$', api.SystemUserAccountsLogsList.as_view(),name='ledger-system-user-account-logs'),
 
         re_path(r'^ledger-ui/accounts-management/(?P<pk>\d+)/change',  views.SystemAccountChange.as_view(), name='accounts-management-change'),
+        re_path(r'^ledger-ui/accounts-management/add',  views.SystemAccountAdd.as_view(), name='accounts-management-add'),     
         re_path(r'^ledger-ui/accounts-management',  views.AccountsManagementView.as_view(), name='accounts-management'),        
 
         # Ledger Account Management Intefac

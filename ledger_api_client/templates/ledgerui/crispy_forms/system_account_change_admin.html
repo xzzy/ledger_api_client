@@ -57,10 +57,27 @@
 <script  type="text/javascript" src="/static/ledger_api_client_node_modules/node_modules/datatables.net/js/dataTables.min.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
 <script  type="text/javascript" src="/static/ledger_api_client_node_modules/node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
 
+<script type="text/javascript" src="/static/ledger_api/js/system_ledger_management.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
+<script type="text/javascript" src="/static/ledger_api/js/ledger_api_django_crispy_forms.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
 
 <div class='container'>
 <BR>
 
+    <div class="modal fade" id="id_create_edit_address_information_modal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="AddressModalLabel">Create Address</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id='id_create_edit_address_information'>
+              No Information Loaded
+            </div>
+      
+          </div>
+        </div>
+      </div>
+<a href="/ledger-ui/accounts-management/" class='btn btn-primary'>Return to Account management</a><br><br>
 <div class="card">
     <h2 class="card-header">
         <div class='row'>
@@ -70,10 +87,19 @@
 
     <div class="card-body">
         {% crispy form %}
-    </div>
-    
+    </div>    
 </div>
 
+<br>
+
+<div class="card">
+    <h2 class="card-header">Address Details</h2>
+  <div class="card-body" id='ledger_ui_address-card-body'>
+     <div id="ledger_ui_address_details"></div>     
+  </div>
+</div>
+
+<br>
 
 <!-- Change Logs -->
 <BR><BR>
@@ -171,6 +197,32 @@
           },      
       },
     } )
+
+    system_ledger_management.var.system_user_id = '{{account_id}}';
+    {% comment %} system_ledger_management.var.ledger_user_id = '{{ledger_user_id}}'; {% endcomment %}
+    system_ledger_management.init();
+    {% comment %} $.ajax({
+        url: '/ledger-ui/crispy-form/address-information/{{ account_id }}',
+        method: "GET",
+        // headers: {'X-CSRFToken' : ledger_management.var.csrf_token},
+        // data: JSON.stringify({'payload': data,}),
+        contentType: "text/html",
+        success: function(data) {
+            
+            $('#ledger_ui_address_details').html(data);
+
+            console.log('Success');
+        },
+        error: function (error) {
+            if (error.status == 403 || error.status == 401) { 
+                $('#id_create_edit_address_information').html('<div class="alert alert-danger" >ERROR: Your do not have permissions to access this resource or your session has expired.</div>');
+            } else {
+                $('#id_create_edit_address_information').html('<div class="alert alert-danger" >ERROR: Unknown error occured while processing your request.</div>');
+            }
+            console.log('Error updating address information');
+        },
+    }); {% endcomment %}
+
     </script>
 
 
