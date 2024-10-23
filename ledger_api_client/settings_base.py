@@ -1,4 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib import messages
+
 # from confy import env, database
 import decouple
 import sys
@@ -345,3 +347,12 @@ LEDGER_UI_CARDS_MANAGEMENT = False
 LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
 for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
     LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS.append(list(am.keys())[0])
+
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}

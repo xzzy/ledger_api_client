@@ -119,6 +119,10 @@ class AccountsFirstTimeView(TemplateView):
         context = {'settings': settings, 'firsttime': True}
         return render(request, self.template_name, context)
 
+
+
+
+
 class SystemAccountsView(LoginRequiredMixin, TemplateView):
 
     template_name = 'ledgerui/system_accounts.html'
@@ -339,34 +343,42 @@ class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
         if su.count() > 0:
             self.object.system_user = su[0]
 
+        sul = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id)                
+        
         self.kwargs.get('pk')
+        self.object.change_by_user_id = sul[0].id
         self.object.save()
 
         if self.object.use_for_postal is True:
-            managed_models.SystemUserAddress.objects.create(system_user=su[0], 
-                                                            address_type='postal_address',
-                                                            line1=self.object.line1,
-                                                            line2=self.object.line2,
-                                                            line3=self.object.line3,
-                                                            locality=self.object.locality,
-                                                            postcode=self.object.postcode,
-                                                            state=self.object.state,
-                                                            country=self.object.country,
-                                                            system_address_link=self.object.id
-                                                            )
-        if self.object.use_for_billing is True:
-            managed_models.SystemUserAddress.objects.create(system_user=su[0], 
-                                                            address_type='billing_address',
-                                                            line1=self.object.line1,
-                                                            line2=self.object.line2,
-                                                            line3=self.object.line3,
-                                                            locality=self.object.locality,
-                                                            postcode=self.object.postcode,
-                                                            state=self.object.state,
-                                                            country=self.object.country,
-                                                            system_address_link=self.object.id
-                                                            )                                                                                    
+            sua = managed_models.SystemUserAddress()
+            sua.change_by_user_id=sul[0].id
+            sua.system_user=su[0]
+            sua.address_type='postal_address'                                                         
+            sua.line1=self.object.line1
+            sua.line2=self.object.line2
+            sua.line3=self.object.line3
+            sua.locality=self.object.locality
+            sua.postcode=self.object.postcode
+            sua.state=self.object.state
+            sua.country=self.object.country
+            sua.system_address_link=self.object.id
+            sua.save()
 
+
+        if self.object.use_for_billing is True:                                                                              
+            sua = managed_models.SystemUserAddress()
+            sua.change_by_user_id=sul[0].id
+            sua.system_user=su[0]
+            sua.address_type='billing_address'                                                         
+            sua.line1=self.object.line1
+            sua.line2=self.object.line2
+            sua.line3=self.object.line3
+            sua.locality=self.object.locality
+            sua.postcode=self.object.postcode
+            sua.state=self.object.state
+            sua.country=self.object.country
+            sua.system_address_link=self.object.id
+            sua.save()
         self.save_success = True
         return render(self.request, self.template_name, self.get_context_data())  
 
@@ -407,19 +419,17 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
         pk = self.kwargs.get('pk')
-        su = managed_models.SystemUser.objects.filter(id=int(pk))
-        print ("HERE 1")
-        print (su.count())
+        system_user_id = self.kwargs.get('system_user_id')
+        su = managed_models.SystemUser.objects.filter(id=int(system_user_id))           
+        sul = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id) 
+
         if su.count() > 0:
             self.object.system_user = su[0]
-            print (self.object.system_user)
 
-            print (self.object.use_for_postal)
-            print ("HERE")
         if self.object.use_for_postal is True:
-            print ("PST")
             if managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').count() > 0: 
                 sua = managed_models.SystemUserAddress.objects.get(system_address_link=self.object.id,address_type='postal_address')
+                sua.change_by_user_id = sul[0].id
                 sua.system_user = self.object.system_user
                 sua.line1 = self.object.line1
                 sua.line2 = self.object.line2
@@ -430,26 +440,33 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
                 sua.country = self.object.country
                 sua.save()
             else:
-                managed_models.SystemUserAddress.objects.create(system_user=self.object.system_user,
-                                                                address_type='postal_address',                                                            
-                                                                line1=self.object.line1,
-                                                                line2=self.object.line2,
-                                                                line3=self.object.line3,
-                                                                locality=self.object.locality,
-                                                                postcode=self.object.postcode,
-                                                                state=self.object.state,
-                                                                country=self.object.country,
-                                                                system_address_link=self.object.id
-                                                                )       
+                sua = managed_models.SystemUserAddress()
+                sua.change_by_user_id=sul[0].id
+                sua.system_user=su[0]
+                sua.address_type='postal_address'                                                         
+                sua.line1=self.object.line1
+                sua.line2=self.object.line2
+                sua.line3=self.object.line3
+                sua.locality=self.object.locality
+                sua.postcode=self.object.postcode
+                sua.state=self.object.state
+                sua.country=self.object.country
+                sua.system_address_link=self.object.id
+                sua.save()
+    
         else:
             
-            sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').delete()
+            sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address')
+            for sua_item in sua:
+                sua_item.change_by_user_id=sul[0].id
+                sua_item.delete()
     
 
         if self.object.use_for_billing is True:
 
             if managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address').count() > 0: 
                 sua = managed_models.SystemUserAddress.objects.get(system_address_link=self.object.id,address_type='billing_address')
+                sua.change_by_user_id = sul[0].id
                 sua.system_user = self.object.system_user
                 sua.line1 = self.object.line1
                 sua.line2 = self.object.line2
@@ -459,22 +476,29 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
                 sua.state = self.object.state
                 sua.country = self.object.country
                 sua.save()     
-            else:
-                managed_models.SystemUserAddress.objects.create(system_user=self.object.system_user,
-                                            address_type='billing_address',                                            
-                                            line1=self.object.line1,
-                                            line2=self.object.line2,
-                                            line3=self.object.line3,
-                                            locality=self.object.locality,
-                                            postcode=self.object.postcode,
-                                            state=self.object.state,
-                                            country=self.object.country,
-                                            system_address_link=self.object.id
-                                            )                   
+            else:            
+
+                sua = managed_models.SystemUserAddress()
+                sua.change_by_user_id=sul[0].id
+                sua.system_user=su[0]
+                sua.address_type='billing_address'                                                         
+                sua.line1=self.object.line1
+                sua.line2=self.object.line2
+                sua.line3=self.object.line3
+                sua.locality=self.object.locality
+                sua.postcode=self.object.postcode
+                sua.state=self.object.state
+                sua.country=self.object.country
+                sua.system_address_link=self.object.id
+                sua.save()                
         else:
-            sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address').delete()                         
+            sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address')                       
+            for sua_item in sua:
+                sua_item.change_by_user_id=sul[0].id
+                sua_item.delete()
 
         self.kwargs.get('pk')
+        self.object.change_by_user_id=sul[0].id
         self.object.save()       
         self.save_success = True
         return render(self.request, self.template_name, self.get_context_data())  
@@ -519,9 +543,20 @@ class AddressInformationDelete(SystemUserAddressPermissionMixin,generic.UpdateVi
     def form_valid(self, form):        
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
+        sul = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id) 
 
-        sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address').delete()
-        sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address').delete()
+        sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='postal_address')
+        for sua_item in sua:
+            sua_item.change_by_user_id=sul[0].id
+            sua_item.delete()
+        
+        
+        sua = managed_models.SystemUserAddress.objects.filter(system_address_link=self.object.id,address_type='billing_address')
+        for sua_item in sua:
+            sua_item.change_by_user_id=sul[0].id
+            sua_item.delete()
+
+        self.object.change_by_user_id=sul[0].id
         self.object.delete()
         # managed_models.SystemUserAddress.objects.filter(id=self.object.id).delete()                
         self.save_success = True
@@ -555,6 +590,49 @@ class InvoicePDFView(InvoiceOwnerMixin, generic.View):
     def get_object(self):
         invoice = get_object_or_404(ledger_models.Invoice, reference=self.kwargs['reference'])
         return invoice
+
+class SystemAccountAdd(AccountManagementPermissionMixin, generic.CreateView):
+    template_name = 'ledgerui/crispy_forms/system_account_add_admin.html'
+    model = managed_models.SystemUser
+    form_class = ledger_api_client_form.SystemUserCreateForm
+    save_success = False 
+
+    def get(self, request, *args, **kwargs):
+        return super(SystemAccountAdd, self).get(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super(SystemAccountAdd, self).get_context_data(**kwargs)   
+        context['pk'] = self.kwargs.get('pk')
+        context['save_success'] = self.save_success
+        context['request'] = self.request                 
+        return context
+    
+    def get_initial(self):
+        initial = super(SystemAccountAdd, self).get_initial()                
+        return initial
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            app = self.get_object().application_set.first()
+            return HttpResponseRedirect(app.get_absolute_url())
+        return super(SystemAccountAdd, self).post(request, *args, **kwargs)
+
+    def get_absolute_account_url(self):        
+        id = self.object.id
+        return "/ledger-ui/accounts-management/{}/change/".format(id)
+
+    def form_valid(self, form):        
+        self.object = form.save(commit=False)
+        forms_data = form.cleaned_data                              
+        self.save_success = True
+
+        su = managed_models.SystemUser.objects.get(ledger_id=self.request.user.id)
+        self.object.change_by_user_id = su.id            
+        self.object.save()
+
+        return HttpResponseRedirect(self.get_absolute_account_url())
+        # return render(self.request, self.template_name, self.get_context_data())  
+
 
 
 class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
@@ -655,9 +733,9 @@ class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
             #             EmailUserChangeLog.objects.create(emailuser=self.object, change_key=fd, change_value=forms_data[fd],change_by=self.request.user)
             # 
 
-
-            messages.success(self.request, "Succesfully Updated {} {} <a href='{}' class='btn btn-sm btn-primary'>Change</a> ".format(self.object.first_name,self.object.last_name,self.get_absolute_account_url()))
-            return HttpResponseRedirect(self.get_absolute_url())
+            messages.success(self.request, "Succesfully updated account for {} {} ({})".format(self.object.legal_first_name,self.object.legal_last_name, self.object.email))
+            # return HttpResponseRedirect(self.get_absolute_url())
+            return HttpResponseRedirect(self.get_absolute_account_url())
         else:            
             return HttpResponseRedirect(self.get_absolute_account_url())
 

@@ -10,6 +10,7 @@
             setTimeout(function() {                
                 $('#id_create_edit_address_information_modal').modal('hide');                
             }, 2000);
+            $('#system-account-management-table').dataTable().api().ajax.reload();
         </script>
     {% else %}      
     

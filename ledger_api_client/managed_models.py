@@ -251,7 +251,7 @@ class SystemUser(models.Model):
  
             if self.change_by_user_id is None:
                 """
-                su = SystemUser
+                su = SystemUser()
                 su.change_by_user_id = 9   # this should be set to the user id of the person making the change and is needed for change log records
                 su.objects.get(id=8)
                 su.first_name = "Bob"
@@ -356,10 +356,6 @@ class SystemUser(models.Model):
                                             change_by_id=self.change_by_user_id
                                             )            
 
-
-
-
-
 class SystemUserAddress(models.Model):
 
     STATE_CHOICES = (
@@ -378,6 +374,8 @@ class SystemUserAddress(models.Model):
             ('billing_address', 'Billing Address'),
     )
 
+    change_by_user_id = None
+
     system_user = models.ForeignKey(SystemUser, on_delete=models.CASCADE)
     address_type = models.CharField(choices=ADDRESS_TYPE, max_length=50, blank=True, null=True )
     line1 = models.CharField('Line 1', max_length=255, blank=True, null=True)
@@ -392,7 +390,189 @@ class SystemUserAddress(models.Model):
     system_address_link = models.IntegerField(blank=True, null=True)
     
     def __str__(self):
-        return '{} {} {} {} {}'.format(self.line1, self.locality, self.state,self.country,self.postcode)
+        return '{} {} {} {} {}'.format(self.line1, self.locality, self.state, self.country,self.postcode)
+
+    def save(self, *args, **kwargs):
+        
+        if self.change_by_user_id is None:
+            """
+            su = SystemAddress()
+            su.change_by_user_id = 9   # this should be set to the user id of the person making the change and is needed for change log records
+            su.objects.get(id=8)
+            su.line1 = "3 John St"
+            su.save()
+            """
+            raise ValidationError("Change User ID not provided, Please provide before changing any user data")
+        
+        if self.pk is None:
+            super(SystemUserAddress, self).save(*args, **kwargs)    
+            
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:address_type',
+                            change_value=str(self.address_type),
+                            change_by_id=self.change_by_user_id
+                            )     
+
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':line1',
+                            change_value=str(self.line1),
+                            change_by_id=self.change_by_user_id
+                            )     
+            
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':line2',
+                            change_value=str(self.line2),
+                            change_by_id=self.change_by_user_id
+                            )     
+            
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':line3',
+                            change_value=str(self.line3),
+                            change_by_id=self.change_by_user_id
+                            )      
+
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':locality',
+                            change_value=str(self.locality),
+                            change_by_id=self.change_by_user_id
+                            )               
+
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':postcode',
+                            change_value=str(self.postcode),
+                            change_by_id=self.change_by_user_id
+                            )     
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':state',
+                            change_value=str(self.state),
+                            change_by_id=self.change_by_user_id
+                            )     
+            
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':country',
+                            change_value=str(self.country),
+                            change_by_id=self.change_by_user_id
+                            )     
+
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':use_for_postal',
+                            change_value=str(self.use_for_postal),
+                            change_by_id=self.change_by_user_id
+                            ) 
+                                        
+            SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                            change_key='create:'+str(self.address_type)+':use_for_billing',
+                            change_value=str(self.use_for_billing),
+                            change_by_id=self.change_by_user_id
+                            )     
+
+        else:
+            system_user_address_old = SystemUserAddress.objects.get(id=self.id)
+            super(SystemUserAddress, self).save(*args, **kwargs) 
+
+            if system_user_address_old.address_type != self.address_type:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':address_type',
+                                            change_value=str(self.address_type),
+                                            change_by_id=self.change_by_user_id
+                                            )    
+            if system_user_address_old.line1 != self.line1:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':line1',
+                                            change_value=str(self.line1),
+                                            change_by_id=self.change_by_user_id
+                                            )   
+
+            if system_user_address_old.line2 != self.line2:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':line2',
+                                            change_value=str(self.line2),
+                                            change_by_id=self.change_by_user_id
+                                            )   
+
+
+            if system_user_address_old.line3 != self.line3:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':line3',
+                                            change_value=str(self.line3),
+                                            change_by_id=self.change_by_user_id
+                                            )   
+
+
+            if system_user_address_old.locality != self.locality:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':locality',
+                                            change_value=str(self.locality),
+                                            change_by_id=self.change_by_user_id
+                                            )  
+                
+
+            if system_user_address_old.postcode != self.postcode:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':postcode',
+                                            change_value=str(self.postcode),
+                                            change_by_id=self.change_by_user_id
+                                            )  
+
+
+            if system_user_address_old.state != self.state:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':state',
+                                            change_value=str(self.state),
+                                            change_by_id=self.change_by_user_id
+                                            )  
+
+
+            if system_user_address_old.country != self.country:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':country',
+                                            change_value=str(self.country),
+                                            change_by_id=self.change_by_user_id
+                                            )                                                  
+
+            if system_user_address_old.use_for_postal != self.use_for_postal:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':use_for_postal',
+                                            change_value=str(self.use_for_postal),
+                                            change_by_id=self.change_by_user_id
+                                            )           
+                
+            if system_user_address_old.use_for_billing != self.use_for_billing:
+                SystemUserChangeLog.objects.create(systemuser=self.system_user,
+                                            change_key=str(self.id)+':'+str(self.address_type)+':use_for_billing',
+                                            change_value=str(self.use_for_billing),
+                                            change_by_id=self.change_by_user_id
+                                            )                           
+
+@receiver(post_delete, sender=SystemUserAddress)
+def delete_preo(sender, instance, **kwargs):
+    print ("DELETING")
+    print (instance.__dict__)
+    print (instance.change_by_user_id)
+  
+    if instance.change_by_user_id is None:
+        """
+            # many items to delete
+            sua = SystemUserAddress.objects.filter(address_type='postal_address')
+            for sua_item in sua:
+                sua_item.change_by_user_id=request.user.id
+                sua_item.delete()
+            
+            # one item to delete
+            sua_item = SystemUserAddress.objects.get(id=199)
+            sua_item.change_by_user_id=request.user.id
+            sua_item.delete()
+
+        """
+        raise ValidationError("Change User ID not provided, Please provide before changing any user data")
+    # system_user_address_old = SystemUserAddress.objects.get(id=self.id)
+
+    SystemUserChangeLog.objects.create(systemuser=instance.system_user,
+                                change_key=str(instance.id)+':'+instance.address_type,
+                                change_value="Deleted",
+                                change_by_id=instance.change_by_user_id
+                                )  
+
 
 
 class SystemUserChangeLog(models.Model):
