@@ -546,9 +546,6 @@ class SystemUserAddress(models.Model):
 
 @receiver(post_delete, sender=SystemUserAddress)
 def delete_preo(sender, instance, **kwargs):
-    print ("DELETING")
-    print (instance.__dict__)
-    print (instance.change_by_user_id)
   
     if instance.change_by_user_id is None:
         """

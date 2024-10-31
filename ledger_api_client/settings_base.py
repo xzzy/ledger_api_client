@@ -342,12 +342,26 @@ LEDGER_UI_ACCOUNTS_MANAGEMENT = [
             {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
 
 ]
+
 LEDGER_UI_CARDS_MANAGEMENT = False
 
 LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
 for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
     LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS.append(list(am.keys())[0])
 
+
+LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT = {
+            'legal_details': {'options' : {"show": True}},
+            'address_details': {'options' : {'residential_address': {"show": True, "total_allowed": 1},'postal_address': {"show": True, "total_allowed": 1},'billing_address': {"show": True, "total_allowed": 1}}},
+            'contact_details': {'options' : {'show': True,}},
+}
+
+LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT_KEYS = []
+for am in LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.items():
+    LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT_KEYS.append(am[0])
+
+print (LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT_KEYS)
+print (LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT)
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',

@@ -1,5 +1,9 @@
 {% block page_content_inner %}
+
+
 <div class='col-12 text-end'><a id='add_address_btn' class='btn btn-sm btn-primary'>Add Address</a></div></div>
+
+{% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.residential_address.show  is True %}
 <div class="ms-1 mb-1 me-1 row "><div class='col-8 text-start'><h6>Residential Address</h6></div><div class='col-4 text-end'></div></div> 
     <div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">      
         <div class='row'>   
@@ -30,7 +34,9 @@
         </div>
     </div>
 </div>
+{% endif %}
 
+{% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.postal_address.show  is True %}
 <div class="ms-1 mb-1 me-1 row "><div class='col-8 text-start'><h6>Postal Address</h6></div><div class='col-4 text-end'></div></div> 
     <div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">          
         <div class='row'>         
@@ -62,7 +68,10 @@
             {% endif %}                      
         </div>
     </div>
-</div>        
+</div>     
+{% endif %}   
+
+{% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.billing_address.show  is True %}
 <div class="ms-1 mb-1 me-1 row "><div class='col-8 text-start'><h6>Billing Address</h6></div><div class='col-4 text-end'></div></div> 
     <div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">                          
         <div class='row'>  
@@ -95,6 +104,7 @@
         </div>
     </div>    
 </div>
+{% endif  %}
 
 <script>
     if ('{{ address_details_completed }}' == 'True') { 

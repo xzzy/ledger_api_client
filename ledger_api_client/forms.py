@@ -147,9 +147,25 @@ class AddressInformationUpdateForm(ModelForm):
         self.fields['postcode'].required = True  
         self.fields['state'].required = True  
 
+
+        address_choices = []
+        for at in self.fields['address_type'].choices:    
+            if at[0] == 'residential_address':
+                if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['residential_address']['show'] is True:
+                    address_choices.append(at)
+            if at[0] == 'postal_address':
+                if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['postal_address']['show'] is True:
+                    address_choices.append(at)                
+
+            if at[0] == 'billing_address':
+                if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['billing_address']['show'] is True:
+                    address_choices.append(at)            
+        self.fields['address_type'].choices = address_choices
+
         self.helper.add_input(Submit('Save', 'Save', css_class='btn-lg', css_id="id_contact_information_btn"))
 
     def clean_postcode(self):
+        
         cleaned_data = self.clean()
         postcode = cleaned_data.get('postcode')
         country = cleaned_data.get('country')
@@ -171,6 +187,40 @@ class AddressInformationUpdateForm(ModelForm):
                 else:
                     raise forms.ValidationError('Invalid state for australia,  inputs accepted (ACT,NSW,NT,QLD,SA,TAS,VIC,WA) ')                   
         return state 
+    
+
+    def clean_address_type(self):
+        cleaned_data = self.clean()
+        address_type = cleaned_data.get('address_type')
+        use_for_postal = cleaned_data.get('use_for_postal')
+
+        system_user_id = self.initial['system_user_id']
+        address_id = None
+        if 'address_id' in self.initial:
+            address_id = self.initial['address_id']
+        use_for_postal = self.data['use_for_postal']
+        use_for_billing = self.data['use_for_billing']
+        system_user_obj = managed_models.SystemUser.objects.get(id=system_user_id)
+        if address_id:
+            residential_address_count = managed_models.SystemUserAddress.objects.filter(system_user=system_user_obj,address_type='residential_address').exclude(system_address_link=address_id).exclude(id=address_id).count()
+            postal_address_count = managed_models.SystemUserAddress.objects.filter(system_user=system_user_obj,address_type='postal_address').exclude(system_address_link=address_id).count()
+            billing_address_count = managed_models.SystemUserAddress.objects.filter(system_user=system_user_obj,address_type='billing_address').exclude(system_address_link=address_id).count()   
+        else:
+            
+            residential_address_count = managed_models.SystemUserAddress.objects.filter(system_user=system_user_obj,address_type='residential_address').count()
+            postal_address_count = managed_models.SystemUserAddress.objects.filter(system_user=system_user_obj,address_type='postal_address').count()
+            billing_address_count = managed_models.SystemUserAddress.objects.filter(system_user=system_user_obj,address_type='billing_address').count()        
+
+        if residential_address_count >= settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['residential_address']['total_allowed'] and address_type == 'residential_address':
+            raise forms.ValidationError('You have reached your address limit of {} for residential address. '.format(str(settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['residential_address']['total_allowed'])))  
+        if use_for_postal == 'true' or use_for_postal is True or address_type == 'postal_address':
+            if postal_address_count >= settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['postal_address']['total_allowed']:
+                raise forms.ValidationError('You have reached your address limit of {} for postal address.'.format(str(settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['postal_address']['total_allowed'])))  
+        if use_for_billing == 'true' or use_for_billing is True or address_type == 'billing_address':            
+            if billing_address_count >= settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['billing_address']['total_allowed']:
+                raise forms.ValidationError('You have reached your address limit of {} for billing address.'.format(str(settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['billing_address']['total_allowed'])))  
+
+        return address_type     
 
 
        
