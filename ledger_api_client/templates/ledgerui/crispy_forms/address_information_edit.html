@@ -33,6 +33,13 @@
                 $('#div_id_use_for_billing').hide();
                 
             }
+            {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.postal_address.show  is False %}
+                $("#div_id_use_for_postal").hide();
+            {% endif %}
+
+            {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.billing_address.show  is False %}  
+                $("#div_id_use_for_billing").hide();
+            {% endif %}                 
         }); 
         var address_type = $('#id_address_type').val();
         if (address_type == 'residential_address') {
@@ -45,6 +52,15 @@
             $('#div_id_use_for_billing').hide();
             
         }
+
+
+        {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.postal_address.show  is False %}
+            $("#div_id_use_for_postal").hide();
+        {% endif %}
+
+        {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.billing_address.show  is False %}  
+            $("#div_id_use_for_billing").hide();
+        {% endif %}            
     </script>
 
     {% endif %}

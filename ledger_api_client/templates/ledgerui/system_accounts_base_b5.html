@@ -311,6 +311,11 @@
   </div>
 </div>
 
+
+	   
+
+
+{% endif %}
 <script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
 <script type="text/javascript" src="/static/ledger_api/js/system_ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
 <script type="text/javascript" src="/static/ledger_api/js/ledger_api_django_crispy_forms.js?ver={{ GIT_COMMIT_HASH }}"></script>
@@ -321,8 +326,7 @@
     system_ledger_management.init();
 </script>
 
-	   
-<div class="modal fade" id="id_create_edit_address_information_modal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true">
+<div class="modal fade" id="id_create_edit_address_information_modal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -336,8 +340,6 @@
     </div>
   </div>
 </div>
-
-{% endif %}
 
 {% block additional_content %}
 {% endblock %}	   

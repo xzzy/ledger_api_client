@@ -55,9 +55,6 @@ class PaymentDetailCheckout(TemplateView):
               no_payment_hash = request.session.get('no_payment_hash')
               basket_hash = request.session.get('basket_hash')
               basket_hash_split = basket_hash.split("|")
-              print ("B HHH")
-              print (basket_hash)
-              print (payment_session)
               basket_totals = ledger_api_client_utils.get_basket_total(basket_hash_split[0])
               if 'data' in basket_totals:
                   if 'basket_total' in basket_totals['data']:
@@ -300,7 +297,7 @@ class AddressInformationView(SystemUserPermissionMixin,generic.TemplateView):
         context['sua_residential_count'] = sua_residential_count
         context['sua_postal_count'] = sua_postal_count
         context['sua_billing_count'] = sua_billing_count
-
+        context['settings'] = settings
         return context
 
 class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
@@ -317,6 +314,7 @@ class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
         context['pk'] = self.kwargs.get('pk')
         context['save_success'] = self.save_success
         context['request'] = self.request
+        context['settings'] = settings
         # su =  managed_models.SystemUser.objects.get(id=self.object.id)
         # if su.mobile_number:
         #     if len(su.mobile_number) > 0:            
@@ -325,7 +323,8 @@ class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
         return context
     
     def get_initial(self):
-        initial = super(AddressInformationCreate, self).get_initial()                
+        initial = super(AddressInformationCreate, self).get_initial() 
+        initial['system_user_id']  = self.kwargs.get('pk')
         return initial
 
     def post(self, request, *args, **kwargs):
@@ -343,11 +342,10 @@ class AddressInformationCreate(SystemUserPermissionMixin,generic.CreateView):
         if su.count() > 0:
             self.object.system_user = su[0]
 
-        sul = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id)                
-        
+        sul = managed_models.SystemUser.objects.filter(ledger_id=self.request.user.id)                                
         self.kwargs.get('pk')
         self.object.change_by_user_id = sul[0].id
-        self.object.save()
+        self.object.save()   
 
         if self.object.use_for_postal is True:
             sua = managed_models.SystemUserAddress()
@@ -398,6 +396,7 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
         context['system_user_id'] = self.kwargs.get('system_user_id')
         context['save_success'] = self.save_success
         context['request'] = self.request
+        context['settings'] = settings
         # su =  managed_models.SystemUser.objects.get(id=self.object.id)
         # if su.mobile_number:
         #     if len(su.mobile_number) > 0:            
@@ -406,7 +405,10 @@ class AddressInformationEdit(SystemUserAddressPermissionMixin,generic.UpdateView
         return context
     
     def get_initial(self):
-        initial = super(AddressInformationEdit, self).get_initial()                
+        initial = super(AddressInformationEdit, self).get_initial()  
+        initial['address_id'] = self.kwargs.get('pk')     
+        initial['system_user_id']  = self.kwargs.get('system_user_id')         
+
         return initial
 
     def post(self, request, *args, **kwargs):
