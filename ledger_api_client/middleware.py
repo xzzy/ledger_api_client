@@ -160,7 +160,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                         suo.email = request.user.email
                         suo.last_login = datetime.datetime.now()           
                         suo.ledger_id_id = request.user.id  # Must use _id_id to prevent OneToOne Lookup Issue
-                        suo.change_by_user_id = su.id           
+                        suo.change_by_user_id = su[0].id           
                         suo.save()                        
                     else:
                         su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email ,first_name=request.user.first_name, last_name=request.user.last_name, is_active=True, last_login=datetime.datetime.now())
