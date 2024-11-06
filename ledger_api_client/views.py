@@ -152,7 +152,11 @@ class SystemAccountsFirstTimeView(LoginRequiredMixin, TemplateView):
             if su.count() > 0:
                 system_user_id = su[0].id 
             else:
-                su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email, first_name=request.user.first_name, last_name=request.user.last_name)
+                su = managed_models.SystemUser.objects.filter(email=request.user.email)
+                if su.count() > 0:
+                   system_user_id = su[0].id                    
+                else: 
+                    su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email, first_name=request.user.first_name, last_name=request.user.last_name)
                 system_user_id = su.id
             context['system_user_id'] = system_user_id
             context['ledger_user_id'] = request.user.id    
