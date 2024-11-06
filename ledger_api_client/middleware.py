@@ -156,7 +156,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                         #su_obj.change_by_user_id = su.id
                         suo = managed_models.SystemUser.objects.get(id=su[0].id)
                         suo.first_name = request.user.first_name
-                        suo.last_name.last_name = request.user.last_name
+                        suo.last_name = request.user.last_name
                         suo.email = request.user.email
                         suo.last_login = datetime.datetime.now()           
                         suo.ledger_id = request.user.id  
