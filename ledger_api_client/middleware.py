@@ -159,7 +159,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
                         suo.last_name = request.user.last_name
                         suo.email = request.user.email
                         suo.last_login = datetime.datetime.now()           
-                        suo.ledger_id = request.user.id  
+                        suo.ledger_id_id = request.user.id  # Must use _id_id to prevent OneToOne Lookup Issue
                         suo.change_by_user_id = su.id           
                         suo.save()                        
                     else:
