@@ -157,7 +157,7 @@ class SystemAccountsFirstTimeView(LoginRequiredMixin, TemplateView):
                    system_user_id = su[0].id                    
                 else: 
                     su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email, first_name=request.user.first_name, last_name=request.user.last_name)
-                system_user_id = su.id
+                    system_user_id = su.id
             context['system_user_id'] = system_user_id
             context['ledger_user_id'] = request.user.id    
         return render(request, self.template_name, context)
