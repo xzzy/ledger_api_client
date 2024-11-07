@@ -367,3 +367,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD=decouple.config('SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD',default=86400, cast=int)
+SYSTEM_ACCOUNT_AUTO=decouple.config('SYSTEM_ACCOUNT_AUTO',default='ledger@dbca.wa.gov.au')
