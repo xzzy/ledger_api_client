@@ -367,3 +367,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD=86400
+SYSTEM_ACCOUNT_AUTO='ledger@dbca.wa.gov.au'

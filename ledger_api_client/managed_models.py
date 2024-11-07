@@ -107,6 +107,11 @@ class SystemUser(models.Model):
         default=False,
         help_text='Will lock the account details preventing changes to the account information.',
     )
+    prevent_auto_lock = models.BooleanField(
+        default=False,
+        help_text='Will prevent to auto locking script from locking the account.',
+    )
+    
     is_staff = models.BooleanField(
         default=False,
         help_text='Designates whether the user can log into the admin site.',
@@ -192,6 +197,11 @@ class SystemUser(models.Model):
                                             change_by_id=self.change_by_user_id
                                             )            
 
+            SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='prevent_auto_lock',
+                                            change_value=str(self.prevent_auto_lock),
+                                            change_by_id=self.change_by_user_id
+                                            )     
 
             SystemUserChangeLog.objects.create(systemuser=self,
                                             change_key='is_staff',
@@ -300,6 +310,13 @@ class SystemUser(models.Model):
                                             change_value=str(self.account_change_locked),
                                             change_by_id=self.change_by_user_id
                                             )            
+
+            if system_user_old.prevent_auto_lock != self.prevent_auto_lock:
+                SystemUserChangeLog.objects.create(systemuser=self,
+                                            change_key='prevent_auto_lock',
+                                            change_value=str(self.prevent_auto_lock),
+                                            change_by_id=self.change_by_user_id
+                                            )                                                   
 
             if system_user_old.is_staff != self.is_staff:
                 SystemUserChangeLog.objects.create(systemuser=self,

@@ -262,7 +262,7 @@ class SystemUserForm(forms.ModelForm):
     class Meta:
         model = managed_models.SystemUser
         # fields = ['email', 'first_name', 'last_name','legal_first_name','legal_last_name', 'title','position_title','manager_name','manager_email', 'dob', 'legal_dob', 'phone_number', 'mobile_number', 'fax_number','identification2','is_staff','is_active']
-        fields = ['email', 'first_name', 'last_name','legal_first_name','legal_last_name', 'title', 'legal_dob', 'phone_number', 'mobile_number', 'fax_number','account_change_locked','is_staff','is_active']
+        fields = ['email', 'first_name', 'last_name','legal_first_name','legal_last_name', 'title', 'legal_dob', 'phone_number', 'mobile_number', 'fax_number','account_change_locked','prevent_auto_lock','is_staff','is_active']
 
     def __init__(self, *args, **kwargs):
         
@@ -297,6 +297,12 @@ class SystemUserForm(forms.ModelForm):
             if f == 'account_change_locked':
                 self.fields[f].widget.attrs['class'] = 'form-check-input'
                 self.fields[f].help_text = ''                
+            if f == 'prevent_auto_lock':
+                self.fields[f].widget.attrs['class'] = 'form-check-input'
+                self.fields[f].help_text = ''                
+
+
+
 
 
         self.fields['first_name'].required = False
@@ -336,6 +342,8 @@ class SystemUserForm(forms.ModelForm):
         # crispy_boxes.append('identification2')
         crispy_boxes.append(HTML("<BR>"))
         crispy_boxes.append('account_change_locked')
+        crispy_boxes.append('prevent_auto_lock')
+        
         crispy_boxes.append('is_staff')
         crispy_boxes.append('is_active')
         
