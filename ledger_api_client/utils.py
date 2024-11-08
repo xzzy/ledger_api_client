@@ -190,7 +190,7 @@ def process_api_refund(request, basket_parameters, customer_id, return_url, retu
     try:
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
-        print ("REFUND RES")
+        print ("Refund Response")
         print (resp.text)
 
     except Exception as e:
@@ -583,7 +583,7 @@ class FakeRequestSessionObj():
          return ''
 
 
-def process_create_future_invoice(basket_id, invoice_text, return_preload_url):
+def process_create_future_invoice(basket_id=None, invoice_text=None, return_preload_url=None, invoice_name=None, due_date=None):
     jsondata = {'status': 404, 'message': 'API Key Not Found'}
     ledger_user_json  = {}
     context = {}
@@ -591,11 +591,11 @@ def process_create_future_invoice(basket_id, invoice_text, return_preload_url):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/process_create_future_invoice/'+api_key+'/'
     api_key = settings.LEDGER_API_KEY
-    myobj = {'basket_id': basket_id, 'invoice_text': invoice_text, 'return_preload_url' : return_preload_url}
+    myobj = {'basket_id': basket_id, 'invoice_text': invoice_text, 'return_preload_url' : return_preload_url, 'invoice_name': invoice_name, 'due_date': due_date}
     resp = ""
     try:
         api_resp = requests.post(url, data = myobj, cookies=cookies)
-       
+        
         resp = api_resp.json()
     except Exception as e:
         print (e)
