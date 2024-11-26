@@ -16,7 +16,6 @@ if BASE_DIR_ENV is None:
    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
    BASE_DIR = BASE_DIR_ENV
-print (BASE_DIR)
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ledger')
 
 PAYMENT_OFFICERS_GROUP = decouple.config('PAYMENT_OFFICERS_GROUP',default='Payments Officers')
