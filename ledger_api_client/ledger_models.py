@@ -48,7 +48,7 @@ class LedgerDBRouter(object):
         
 
         #or model._meta.db_table == 'django_admin_log'
-        return None
+        return 'default'
 
     def db_for_write(self, model, **hints):
         """
@@ -56,7 +56,7 @@ class LedgerDBRouter(object):
         """
         if model._meta.db_table == 'accounts_emailuser': # or model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
            return 'ledger_db'
-        return None
+        return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):
         """
