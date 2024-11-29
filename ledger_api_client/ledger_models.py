@@ -38,7 +38,7 @@ class LedgerDBRouter(object):
 
     def db_for_read(self, model, **hints):
          
-        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions':
+        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions' or model._meta.db_table == 'accounts_address':
             return 'ledger_db'
         if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
             return 'ledger_db'
