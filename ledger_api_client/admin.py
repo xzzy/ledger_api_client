@@ -19,12 +19,14 @@ class SystemGroupPermissionInline(admin.TabularInline):
 @admin.register(managed_models.SystemGroup)
 class SystemGroupAdmin(ModelAdmin):
     list_display = ('id','name','description')
+    search_fields = ('id','name','description',)
     inlines = [SystemGroupPermissionInline]
 
 @admin.register(managed_models.SystemUser)
 class SystemuserAdmin(ModelAdmin):
     list_display = ('id','legal_first_name','legal_last_name')    
     raw_id_fields = ('ledger_id',)
+    search_fields = ('id','first_name','last_name','legal_first_name','legal_last_name','email',)
 
     def save_model(self, request, obj, form, change):
 
@@ -51,6 +53,7 @@ class SystemuserAdmin(ModelAdmin):
 @admin.register(managed_models.SystemUserAddress)
 class SystemUserAddressAdmin(ModelAdmin):
     list_display = ('id','system_user','address_type','line1','locality','postcode','state','country')    
+    search_fields = ('id','system_user','line1','locality','postcode','state','country')
     raw_id_fields = ('system_user',)
 
     # def save_model(self, request, obj, form, change):
