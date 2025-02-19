@@ -894,7 +894,7 @@ class Basket(models.Model):
        db_table = 'basket_basket'
 
 class UsersInGroup(models.Model):
-    id = models.IntegerField(default=None, blank=True, null=True)
+    id = models.IntegerField(primary_key=True)
     emailuser_id = models.IntegerField(default=None, blank=True, null=True)
     group_id = models.IntegerField(default=None, blank=True, null=True)    
 
