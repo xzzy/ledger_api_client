@@ -38,7 +38,7 @@ class LedgerDBRouter(object):
 
     def db_for_read(self, model, **hints):
          
-        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions' or model._meta.db_table == 'accounts_address':
+        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions' or model._meta.db_table == 'accounts_address' or model._meta.db_table == 'accounts_emailuser_groups':
             return 'ledger_db'
         if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
             return 'ledger_db'
@@ -893,4 +893,14 @@ class Basket(models.Model):
        managed = False
        db_table = 'basket_basket'
 
+class UsersInGroup(models.Model):
+    id = models.IntegerField(default=None, blank=True, null=True)
+    emailuser_id = models.IntegerField(default=None, blank=True, null=True)
+    group_id = models.IntegerField(default=None, blank=True, null=True)    
 
+    def __str__(self):
+        return str(self.group_id)
+
+    class Meta:
+        managed = False
+        db_table = 'accounts_emailuser_groups'
