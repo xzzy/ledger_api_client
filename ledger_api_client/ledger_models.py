@@ -744,6 +744,9 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
         dob is after 30 June 1959 and age is 65 or older
         :return:
         """
+        if not self.dob:
+            return False
+
         return \
             self.dob < date(1955, 7, 1) or \
             ((date(1955, 7, 1) <= self.dob <= date(1956, 6, 30)) and self.age() >= 61) or \
