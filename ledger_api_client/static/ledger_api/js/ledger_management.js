@@ -35,6 +35,9 @@ var ledger_management = {
                 pagesettings: {
                      loader: "<div class='text-center p-5'><div class='spinner-grow text-primary' role='status'><span class='visually-hidden'>Loading...</span></div><div class='fw-bold'>Loading</div></div>",
                      button_loader: "<button class='btn btn-primary' type='button' disabled><span class='spinner-grow spinner-grow-sm' role='status'></span>&nbsp;&nbsp;Loading...</button>"
+                },
+                identification_attachment: { "attachment_cache" : [],
+                                             "reader": null
                 }
         },
         init: function (user_id) {
@@ -387,6 +390,19 @@ var ledger_management = {
                 get_data: function() {
                     $('#div-ledger-ui-identification').show();
                     $('#div-ledger-ui-identification-loader').hide();
+
+                    if (ledger_management.var.account_data.identification) {
+                        if (ledger_management.var.account_data.identification.length > 0) {
+                            $('#current_identification').html(ledger_management.var.account_data.identification);
+                        }
+                    }  
+
+                    if (ledger_management.var.information_status.identification_details_completed == true) { 
+                        $('#identification-details-status').html('<i class="bi bi-check-circle-fill" style="color: #08c508;"></i>');
+                    } else {
+                        $('#identification-details-status').html('<i class="bi bi-x-circle-fill" style="color: #ff0909"></i>');
+                    }                       
+
                 },
                 get_data_loading: function() {
                     $('#div-ledger-ui-identification').hide();
@@ -397,8 +413,49 @@ var ledger_management = {
                     } else {
                          setTimeout("ledger_management.identification.get_data_loading();", 200);
                     }
+                 
+                    console.log(ledger_management.var.account_data.identification);
+                },
+                file_selection: function(evt) {
+                    var files = evt.target.files;
+                    console.log("FILE LENGTH");
+                    console.log(files.length);
+                        console.log(files);
+                        for (var i = 0; i < files.length; i++) {
+                         
+                             console.log(i);
+                             // text += cars[i] + "<br>";
+                        
+                             var file = files[i];
+                             if (files && file) {
+                                  var reader = new FileReader();
+                                  reader['filename'] = file.name; 
+                          reader.readAsDataURL(file);
+                          ledger_management.var.identification_attachment.reader = reader;
+                          // Reset array to zero
+                          ledger_management.var.identification_attachment.attachment_cache = []
+                          // Add attachment to array
+                          ledger_management.var.identification_attachment.attachment_cache.push({'filename': reader.filename, 'reader': reader});
+                        //   ledger_management.var.identification_attachment.refresh_attachment_preview();
+                          //console.log(reader.readAsBinaryString(file));
+                
+                             }
+                        }   
+                                            
+                        if (ledger_management.var.identification_attachment.attachment_cache.length > 0) {
+                            $('#new_identification').html("File to be updated: <b style='color:red'>"+ledger_management.var.identification_attachment.attachment_cache[0].filename+ "</b>, click update to save.");
+                            
+                        }                                                     
                 },
                 update_data: function() {
+                    var data = {};        
+                    var attachment_info = {"filename": '', "base64": ''}            
+                    attachment_info['filename'] = ledger_management.var.identification_attachment.attachment_cache[0].filename
+                    attachment_info['base64'] = ledger_management.var.identification_attachment.attachment_cache[0].reader.result
+                    data['identification'] = JSON.stringify(attachment_info)
+                    // ledger_management.var.identification_attachment.attachment_cache[0].reader.result
+
+                    ledger_management.update_account_details(data); 
                     ledger_management.get_account_details();
                     ledger_management.identification.get_data_loading();
                 },
@@ -414,7 +471,8 @@ var ledger_management = {
                      html += "         <label for='inputLine1' class='col-form-label fw-bold'>Identification</label>";
                      html += "       </div>";
                      html += "       <div class='col-5 p-2'> ";
-                     html += "         <input type='input' id='inputLine1' class='form-control'>";
+                     html += "         <input type='file' id='identificationFilePicker' class='form-control' style='display:none'>";
+                     html += "          <button class='btn btn-primary' type='button' id='identificationFilePickerSelectButton'>Select File</button>";
                      html += "       </div>";
                      html += "       <div class='col-4  p-2'>";
                      html += "           <span id='moreinfoInline' class='form-text'>";
@@ -422,16 +480,48 @@ var ledger_management = {
                      html += "         </span>";
                      html += "       </div>";
 
+                     html += "       <div class='col-3 text-end p-2'>";
+                     html += "         <label for='inputLine1' class='col-form-label fw-bold'></label>";
+                     html += "       </div>";
+                     html += "       <div class='col-5 p-2'> ";
+                     html += "         <b>Current Identification: </b><br>";
+                     html += "          <span id='current_identification'></span>";
+                     html += "       </div>";
+                     html += "       <div class='col-4  p-2'>";
+                     html += "           <span id='moreinfoInline' class='form-text'>";
+                     html += "             ";
+                     html += "         </span>";
+                     html += "       </div>";          
+
+                     html += "       <div class='col-3 text-end p-2'>";
+                     html += "         <label for='inputLine1' class='col-form-label fw-bold'></label>";
+                     html += "       </div>";
+                     html += "       <div class='col-5 p-2'> ";
+                     html += "         <b>Identification to Update </b><br>";
+                     html += "          <span id='new_identification'>Click 'Select Files' to provide updated document.</span>";
+                     html += "       </div>";
+                     html += "       <div class='col-4  p-2'>";
+                     html += "           <span id='moreinfoInline' class='form-text'>";
+                     html += "             ";
+                     html += "         </span>";
+                     html += "       </div>";  
+                     
                      html += " <div class='d-grid gap-2 d-md-flex justify-content-md-end'> <button class='pull-right btn btn-primary' id='update-identification-details'>Update</button></div>";
                      html += "</div>";
                      html += "</div>";
 
 
                      $('#ledger_ui_identification_details').html(html);
-
+                     $('#identificationFilePickerSelectButton').click(function() {
+                        $('#identificationFilePicker').click();
+                     });
                      $('#update-identification-details').click(function() {
                              ledger_management.identification.update_data();
                      });
+                     
+
+                     
+                     document.getElementById('identificationFilePicker').addEventListener('change', ledger_management.identification.file_selection, false);
                      // ledger_management.identification.get_data_loading();
                 }
         },
