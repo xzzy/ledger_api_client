@@ -484,6 +484,13 @@ def get_account_details(request, user_id):
                 resp['information_status']["personal_details_completed"] = True
         else:
             resp['information_status']["personal_details_completed"] = True
+
+        # identification details validation
+        if 'identification' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT:
+            if len(resp['data']['identification']) == 2:
+                resp['information_status']["identification_details_completed"] = True
+        else:
+            resp['information_status']["identification_details_completed"] = True            
         
         # contact details validation
         if 'phone_number' in resp['data']  or 'mobile_number' in resp['data']:  
