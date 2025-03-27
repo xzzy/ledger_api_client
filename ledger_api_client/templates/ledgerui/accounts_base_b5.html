@@ -100,6 +100,7 @@
 
 <div id='nav-details-tab-page'>
 {% if 'first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'dob' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<a name="personal-details"></a>
 <div class="card" id='personal-details-card-box'>
   <div class="card-header fw-bold h4" style='padding:30px;'>
         <div class='row'>
@@ -120,6 +121,7 @@
 {% endif %}
 
 {% if 'identification' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<a name="identification"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'>
          <div class='row'>
@@ -145,6 +147,7 @@
 {% endif %}
 
 {% if 'residential_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<a name="residential-address"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'> 
     <div class='row'>
@@ -166,6 +169,7 @@
 <br>
 {% endif %}
 
+<a name="contact-details"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'>
     <div class='row'>
