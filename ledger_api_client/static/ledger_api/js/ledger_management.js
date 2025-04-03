@@ -41,9 +41,8 @@ var ledger_management = {
                 }
         },
         init: function (user_id) {
-	    ledger_management.var.data.accounts.user_id = user_id;
-	    ledger_management.init_begin();
-  
+	        ledger_management.var.data.accounts.user_id = user_id;
+	        ledger_management.init_begin();
         },
         init_begin: function() {
             var load_steps = Object.keys(ledger_management.var.steps);   

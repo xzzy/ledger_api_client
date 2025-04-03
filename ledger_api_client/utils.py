@@ -648,3 +648,12 @@ def get_ledger_totals():
        print ("error opening ledger totals")
 
     return ledger_totals
+
+
+def remove_html_tags(text):
+    HTML_TAGS_WRAPPED = re.compile(r'<[^>]+>.+</[^>]+>')
+    HTML_TAGS_NO_WRAPPED = re.compile(r'<[^>]+>')
+
+    text = HTML_TAGS_WRAPPED.sub('', text)
+    text = HTML_TAGS_NO_WRAPPED.sub('', text)
+    return text

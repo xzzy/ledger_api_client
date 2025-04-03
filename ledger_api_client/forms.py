@@ -11,6 +11,7 @@ from django_countries.fields import CountryField
 from django_countries.data import COUNTRIES
 from django import forms
 from ledger_api_client import managed_models
+from ledger_api_client import utils as ledger_api_client_utils
 
 class BaseFormHelper(FormHelper):
     form_class = 'form-horizontal'
@@ -87,6 +88,7 @@ class PersonalInformationUpdateForm(ModelForm):
             raise forms.ValidationError('Please provide a valid last name.')
         elif len(legal_last_name) < 2:
             raise forms.ValidationError('Please provide a valid last name.')
+        legal_last_name = ledger_api_client_utils.remove_html_tags(legal_last_name)
         return legal_last_name
 
     def clean_legal_first_name(self):
@@ -96,6 +98,7 @@ class PersonalInformationUpdateForm(ModelForm):
             raise forms.ValidationError('Please provide a valid first name.')
         elif len(legal_first_name) < 2:
             raise forms.ValidationError('Please provide a valid first name.')
+        legal_first_name = ledger_api_client_utils.remove_html_tags(legal_first_name)
         return legal_first_name
 
 class ContactInformationUpdateForm(ModelForm):
@@ -119,6 +122,7 @@ class ContactInformationUpdateForm(ModelForm):
                 raise forms.ValidationError('Please provide a valid mobile phone number')        
         else:
             raise forms.ValidationError('Please provide a valid mobile phone number')
+        mobile_number = ledger_api_client_utils.remove_html_tags(mobile_number)
         return mobile_number
     
     def clean_phone_number(self):
@@ -127,6 +131,7 @@ class ContactInformationUpdateForm(ModelForm):
         if phone_number:
             if len(phone_number) < 10:
                 raise forms.ValidationError('Please provide a valid phone number')        
+        phone_number = ledger_api_client_utils.remove_html_tags(phone_number)
         return phone_number    
     
 
@@ -147,7 +152,6 @@ class AddressInformationUpdateForm(ModelForm):
         self.fields['postcode'].required = True  
         self.fields['state'].required = True  
 
-
         address_choices = []
         for at in self.fields['address_type'].choices:    
             if at[0] == 'residential_address':
@@ -164,6 +168,30 @@ class AddressInformationUpdateForm(ModelForm):
 
         self.helper.add_input(Submit('Save', 'Save', css_class='btn-lg', css_id="id_contact_information_btn"))
 
+    def clean_line1(self):    
+        cleaned_data = self.clean()
+        line1 = cleaned_data.get('line1')        
+        line1 = ledger_api_client_utils.remove_html_tags(line1)
+        return line1
+
+    def clean_line2(self):    
+        cleaned_data = self.clean()
+        line2 = cleaned_data.get('line2')        
+        line2 = ledger_api_client_utils.remove_html_tags(line2)
+        return line2
+    
+    def clean_line3(self):    
+        cleaned_data = self.clean()
+        line3 = cleaned_data.get('line3')        
+        line3 = ledger_api_client_utils.remove_html_tags(line3)
+        return line3
+
+    def clean_locality(self):    
+        cleaned_data = self.clean()
+        locality = cleaned_data.get('locality')        
+        locality = ledger_api_client_utils.remove_html_tags(locality)
+        return locality
+
     def clean_postcode(self):
         
         cleaned_data = self.clean()
@@ -173,6 +201,7 @@ class AddressInformationUpdateForm(ModelForm):
             if postcode:
                 if len(postcode) != 4:
                     raise forms.ValidationError('Invalid postcode for australia')        
+        postcode = ledger_api_client_utils.remove_html_tags(postcode)
         return postcode
                 
     def clean_state(self):
@@ -186,6 +215,7 @@ class AddressInformationUpdateForm(ModelForm):
                     pass
                 else:
                     raise forms.ValidationError('Invalid state for australia,  inputs accepted (ACT,NSW,NT,QLD,SA,TAS,VIC,WA) ')                   
+        state = ledger_api_client_utils.remove_html_tags(state)
         return state 
     
 
@@ -220,6 +250,7 @@ class AddressInformationUpdateForm(ModelForm):
             if billing_address_count >= settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['billing_address']['total_allowed']:
                 raise forms.ValidationError('You have reached your address limit of {} for billing address.'.format(str(settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT['address_details']['options']['billing_address']['total_allowed'])))  
 
+        address_type = ledger_api_client_utils.remove_html_tags(address_type)
         return address_type     
 
 
@@ -350,3 +381,68 @@ class SystemUserForm(forms.ModelForm):
         crispy_boxes.append(HTML("<BR>"))
 
         self.helper.layout = Layout(crispy_boxes)
+
+
+    def clean_email(self):    
+        cleaned_data = self.clean()
+        email = cleaned_data.get('email')        
+        email = ledger_api_client_utils.remove_html_tags(email)
+        return email
+    
+    def clean_first_name(self):    
+        cleaned_data = self.clean()
+        first_name = cleaned_data.get('first_name')        
+        if first_name is not None:    
+            first_name = ledger_api_client_utils.remove_html_tags(first_name)
+            return first_name    
+
+
+    def clean_last_name(self):    
+        cleaned_data = self.clean()
+        last_name = cleaned_data.get('last_name')        
+        if last_name is not None:    
+            last_name = ledger_api_client_utils.remove_html_tags(last_name)
+            return last_name   
+
+    def clean_legal_first_name(self):    
+        cleaned_data = self.clean()
+        legal_first_name = cleaned_data.get('legal_first_name')        
+        legal_first_name = ledger_api_client_utils.remove_html_tags(legal_first_name)
+        return legal_first_name   
+    
+    def clean_legal_last_name(self):    
+        cleaned_data = self.clean()
+        legal_last_name = cleaned_data.get('legal_last_name')        
+        legal_last_name = ledger_api_client_utils.remove_html_tags(legal_last_name)
+        return legal_last_name   
+
+    def clean_title(self):    
+        cleaned_data = self.clean()
+        title = cleaned_data.get('title')        
+        title = ledger_api_client_utils.remove_html_tags(title)
+        return title  
+
+    # def clean_legal_dob(self):    
+    #     cleaned_data = self.clean()
+    #     legal_dob = cleaned_data.get('legal_dob')        
+    #     legal_dob = ledger_api_client_utils.remove_html_tags(legal_dob)
+    #     return legal_dob    
+
+    def clean_phone_number(self):    
+        cleaned_data = self.clean()
+        phone_number = cleaned_data.get('phone_number')        
+        phone_number = ledger_api_client_utils.remove_html_tags(phone_number)
+        return phone_number  
+
+    def clean_mobile_number(self):    
+        cleaned_data = self.clean()
+        mobile_number = cleaned_data.get('mobile_number')        
+        mobile_number = ledger_api_client_utils.remove_html_tags(mobile_number)
+        return mobile_number    
+
+    def clean_fax_number(self):    
+        cleaned_data = self.clean()
+        fax_number = cleaned_data.get('fax_number')        
+        fax_number = ledger_api_client_utils.remove_html_tags(fax_number)
+        return fax_number    
+

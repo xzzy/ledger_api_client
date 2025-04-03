@@ -422,6 +422,10 @@ def get_settings(request):
     resp = {'status': 200, 'data': {}, 'message': '', 'config': settings.LEDGER_UI_ACCOUNTS_MANAGEMENT}
     return HttpResponse(json.dumps(resp), content_type='application/json')
 
+def get_organisation_settings(request):
+    resp = {'status': 200, 'data': {}, 'message': '', 'config': settings.LEDGER_UI_ORGANISATION_MANAGEMENT}
+    return HttpResponse(json.dumps(resp), content_type='application/json')
+
 def get_countries(request):
     resp = {'status': 404, 'data': {}, 'message': ''}
     json_response = {}
@@ -445,6 +449,66 @@ def get_countries(request):
        resp['data'] = countries_loads
 
     return HttpResponse(json.dumps(resp), content_type='application/json')
+
+
+def update_organisation_details(request,org_id):
+    resp = {'status': 404, 'data': {}, 'message': ''}
+    json_response = {}
+    api_key = settings.LEDGER_API_KEY
+    data = json.load(request)
+    payload = data.get('payload')    
+    org_obj = payload
+    org_obj["organisation_id"] = org_id
+  
+    resp_ledger = ledger_api_client_utils.update_organisation_obj(org_obj)
+    try:
+        if resp_ledger['status'] == 200: 
+            resp['status'] = resp_ledger['status']
+            resp['message'] = resp_ledger['message']
+    except Exception as e:
+        print (resp_ledger)
+        print (e)
+        resp = {'status': 500, 'data': {}, 'message': str(e)}
+        
+    return HttpResponse(json.dumps(resp), content_type='application/json', status=resp['status'])  
+
+def get_organisation_details(request, org_id):
+    resp = {'status': 404, 'data': {}, 'message': ''}
+
+    ex_locals = {}
+    allow_access = False
+    is_authen = request.user.is_authenticated
+    if is_authen:
+        # allow_access = True
+        if settings.ORGANISATION_PERMISSION_MODULE is not None:
+            # To configure permissions create a new file called permission.py in your system directory with the following function. Modify the funcation to restrict the access correctly. 
+            # def organisation_permissions(request, org_id):
+            #                
+            #    if orguser is allow access:
+            #       return True
+            #    else:
+            #        return False
+            #
+            # ORGANISATION_PERMISSION_MODULE = '<system_app_name>.permission'
+            # This should be the python path to the python file
+            # the def must always be organisation_permissions
+            #                 
+            perm_module = __import__(settings.ORGANISATION_PERMISSION_MODULE, fromlist=['organisation_permissions'])
+            allow_access = perm_module.organisation_permissions(request, org_id)               
+
+    if allow_access is True:
+        try:
+            resp["data"] = ledger_api_client_utils.get_organisation(org_id)
+            resp['status'] = 200
+        except Exception as e:
+            traceback.print_exc()
+            raise serializers.ValidationError(str(e))           
+
+    # with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/organisationid/"+org_id+"/"+settings.LEDGER_API_KEY+"/", data) as url:
+    #     json_response = json.loads(url.read().decode())
+
+    return HttpResponse(json.dumps(resp), content_type='application/json')
+
 
 def get_account_details(request, user_id):
     resp = {'status': 404, 'data': {}, 'message': '', 'config': settings.LEDGER_UI_ACCOUNTS_MANAGEMENT}
