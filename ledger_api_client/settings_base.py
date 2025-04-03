@@ -319,6 +319,13 @@ PAYMENT_INTERFACE_SYSTEM_ID=decouple.config('PAYMENT_INTERFACE_SYSTEM_ID', defau
 SESSION_EXPIRY_SSO = 883600
 ENABLE_DJANGO_LOGIN=decouple.config("ENABLE_DJANGO_LOGIN", default=False, cast=bool)
 
+LEDGER_UI_ORGANISATION_MANAGEMENT = [
+        {'organisation_name': {'options' : {'view': True, 'edit': True}}},
+        {'organisation_abn': {'options' : {'view': True, 'edit': True}}},
+        {'billing_address': {'options' : {'view': True, 'edit': True}}},
+        {'postal_address': {'options' : {'view': True, 'edit': True}}}
+]
+
 LEDGER_UI_ACCOUNTS_MANAGEMENT = [
             # {'account_name': {'options' : {'view': True, 'edit': True}}},
             # {'legal_name': {'options' : {'view': True, 'edit': True}}},
@@ -369,3 +376,4 @@ MESSAGE_TAGS = {
 
 SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD=decouple.config('SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD',default=86400, cast=int)
 SYSTEM_ACCOUNT_AUTO=decouple.config('SYSTEM_ACCOUNT_AUTO',default='ledger@dbca.wa.gov.au')
+ORGANISATION_PERMISSION_MODULE = None

@@ -33,6 +33,7 @@ urlpatterns = [
         # Ledger Account Management Intefac
         re_path(r'^ledger-ui/accounts-firsttime',  views.AccountsFirstTimeView.as_view(), name='account-firstime'),
         re_path(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
+        re_path(r'^ledger-ui/organisation/(?P<pk>[0-9]+)/',  views.OrganisationView.as_view(), name='view-organisation'),
 
         # System Account Management - Store Personal Information in local system database but maintain link to ledger account id
         re_path(r'^ledger-ui/system-accounts-firsttime',  views.SystemAccountsFirstTimeView.as_view(), name='system-account-firstime'),
@@ -50,6 +51,8 @@ urlpatterns = [
         
 
         re_path(r'^ledger-ui/api/get-settings/', api.get_settings, name='get-settings'),
+        re_path(r'^ledger-ui/api/get-organisation-settings/', api.get_organisation_settings, name='get-organisation-settings'),
+
         re_path(r'^ledger-ui/api/get-countries/', api.get_countries, name='get-settings'),
 
         re_path(r'^ledger-ui/api/get-account-details/(?P<user_id>[0-9]+)/', api.get_account_details, name='get-account-details'),
@@ -59,6 +62,8 @@ urlpatterns = [
         re_path(r'^ledger-toolkit-api/delete-card-token/(?P<card_token_id>[0-9]+)/', api.delete_card_token),
         re_path(r'^ledger-toolkit-api/store-card/', api.store_card),
         re_path(r'^ledger-toolkit-api/set-primary-card/', api.set_primary_card),
+        re_path(r'^ledger-ui/api/get-organisation-details/(?P<org_id>[0-9]+)/', api.get_organisation_details, name='get-organisation-details'),
+        re_path(r'^ledger-ui/api/update-organisation-details/(?P<org_id>[0-9]+)/', api.update_organisation_details, name='update-organisation-details'),
         
 ]
 if settings.ENABLE_DJANGO_LOGIN is True:

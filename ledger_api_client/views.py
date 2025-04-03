@@ -118,7 +118,13 @@ class AccountsFirstTimeView(TemplateView):
 
 
 
+class OrganisationView(TemplateView):
 
+    template_name = 'ledgerui/organisation.html'
+    def get(self, request, *args, **kwargs):
+        org_id = kwargs['pk']
+        context = {'settings': settings, 'org_id': org_id}        
+        return render(request, self.template_name, context)
 
 class SystemAccountsView(LoginRequiredMixin, TemplateView):
 
@@ -699,7 +705,7 @@ class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
             
             for e in eu[0].keys():
                 uservalue_map[e] = eu[0][e]            
-            
+ 
             # if 'identification2_id' in uservalue_map:
             #     if uservalue_map['identification_id'] is not None:
             #         self.object.identification2 = PrivateDocument.objects.get(id=uservalue_map['identification2_id'])
