@@ -651,6 +651,10 @@ def get_ledger_totals():
 
 
 def remove_html_tags(text):
+    
+    if text is None:
+        return None
+
     HTML_TAGS_WRAPPED = re.compile(r'<[^>]+>.+</[^>]+>')
     HTML_TAGS_NO_WRAPPED = re.compile(r'<[^>]+>')
 
