@@ -72,7 +72,15 @@ var ledger_management_organisation = {
         ledger_management_organisation.var.csrf_token = $('#ledger_ui_csrf_token').val();
         ledger_management_organisation.var.data.organisation.org_id = org_id;     
         ledger_management_organisation.get_settings();
-        ledger_management_organisation.init_begin(org_id);        
+        ledger_management_organisation.init_begin(org_id);    
+        
+        $('.managed-organisation-nav').click(function() {
+            $('.managed-organisation-nav').each(function(i, obj) {  
+                console.log(obj.id);                         
+                $("#"+obj.id+'-page').hide();
+            });
+            $("#"+this.id+'-page').show();                          
+        });    
     },
     init_begin: function (org_id) {
 

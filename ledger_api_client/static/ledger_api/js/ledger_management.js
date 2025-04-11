@@ -43,6 +43,13 @@ var ledger_management = {
         init: function (user_id) {
 	        ledger_management.var.data.accounts.user_id = user_id;
 	        ledger_management.init_begin();
+            $('.managed-account-nav').click(function() {
+                $('.managed-account-nav').each(function(i, obj) {                               
+                    $("#"+obj.id+'-page').hide();
+                });
+                $("#"+this.id+'-page').show();                          
+            });
+
         },
         init_begin: function() {
             var load_steps = Object.keys(ledger_management.var.steps);   
@@ -1168,12 +1175,12 @@ var ledger_management = {
                         });
                         $('#nav-cards-tab-page').hide();
 
-                        $('.managed-account-nav').click(function() {
-                            $('.managed-account-nav').each(function(i, obj) {                               
-                                $("#"+obj.id+'-page').hide();
-                            });
-                            $("#"+this.id+'-page').show();                          
-                        });
+                        // $('.managed-account-nav').click(function() {
+                        //     $('.managed-account-nav').each(function(i, obj) {                               
+                        //         $("#"+obj.id+'-page').hide();
+                        //     });
+                        //     $("#"+this.id+'-page').show();                          
+                        // });
                         ledger_management.var.steps['step5'].loading = false;
                         ledger_management.var.steps['step5'].completed = true;
     
