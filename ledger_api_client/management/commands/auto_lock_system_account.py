@@ -22,8 +22,16 @@ class Command(BaseCommand):
         for su in su_obj:            
             timedelta_obj = nowtime - su.created.astimezone()
             diff_in_seconds = timedelta_obj.days * 24 * 3600 + timedelta_obj.seconds
-            if diff_in_seconds > settings.SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD:
-                print ("Locking Account: "+str(su.legal_first_name)+" "+str(su.legal_last_name)+" ("+str(su.id)+") as created seconds is "+str(diff_in_seconds)+" which longer than "+str(settings.SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD))                
-                su.account_change_locked = True
-                su.change_by_user_id = mm.id
-                su.save()
+            prevent_locking = False
+            if su.legal_first_name is None or su.legal_first_name == '':
+                prevent_locking= True
+            
+            if su.legal_last_name is None or su.legal_last_name == '':
+                prevent_locking= True
+
+            if prevent_locking is False:
+                if diff_in_seconds > settings.SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD:
+                    print ("Locking Account: "+str(su.legal_first_name)+" "+str(su.legal_last_name)+" ("+str(su.id)+") as created seconds is "+str(diff_in_seconds)+" which longer than "+str(settings.SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD))                
+                    su.account_change_locked = True
+                    su.change_by_user_id = mm.id
+                    su.save()
