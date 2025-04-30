@@ -9,6 +9,7 @@ from django.contrib import messages
 # from confy import env
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from ledger_api_client import managed_models
+from ledger_api_client import utils
 import datetime
 
 class SSOLoginMiddleware(MiddlewareMixin):
@@ -95,7 +96,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
 
                  for key, value in attributemap.items():
                      if value in request.META:
-                         attributemap[key] = request.META[value]
+                         attributemap[key] = utils.remove_html_tags(request.META[value])
 
                  if hasattr(settings, 'ALLOWED_EMAIL_SUFFIXES') and settings.ALLOWED_EMAIL_SUFFIXES:
                      allowed = settings.ALLOWED_EMAIL_SUFFIXES
