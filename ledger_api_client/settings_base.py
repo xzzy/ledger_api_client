@@ -1,3 +1,5 @@
+import django
+
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib import messages
 
@@ -86,10 +88,16 @@ if SESSION_COOKIE_DOMAIN:
 
 
 # Email settings
-ADMINS = ('asi@dpaw.wa.gov.au',)
 EMAIL_HOST = decouple.config('EMAIL_HOST', default='email.host')
 EMAIL_PORT = decouple.config('EMAIL_PORT', default=25)
-EMAIL_FROM = decouple.config('EMAIL_FROM', default=ADMINS[0])
+
+if django.VERSION >= (3, 2):
+    ADMINS = (('ASI Notifications', 'asi@dpaw.wa.gov.au',),)
+    EMAIL_FROM = decouple.config('EMAIL_FROM', default=ADMINS[0][1])
+else:
+    ADMINS = ('asi@dpaw.wa.gov.au',)
+    EMAIL_FROM = decouple.config('EMAIL_FROM', default=ADMINS[0])
+
 DEFAULT_FROM_EMAIL = EMAIL_FROM
 
 TEMPLATES = [
