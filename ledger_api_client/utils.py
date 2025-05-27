@@ -515,6 +515,13 @@ def calculate_excl_gst(amount):
     result = (Decimal(100.0) / Decimal(100 + settings.LEDGER_GST) * Decimal(amount)).quantize(TWELVEPLACES)
     return result
 
+def format_currency(amount, currency_symbol="$"):
+    try:
+        amount = float(amount)  # Ensure the input is a number
+        return f"{currency_symbol}{amount:,.2f}"
+    except ValueError:
+        return "Invalid input: Please provide a numerical value."
+
 #@register.filter(name='currency')
 def currency(value, currency=None):
     """
