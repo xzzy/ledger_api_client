@@ -130,7 +130,7 @@ class ContactInformationUpdateForm(ModelForm):
         phone_number = cleaned_data.get('phone_number')
         if phone_number:
             if len(phone_number) < 10:
-                raise forms.ValidationError('Please provide a valid landline number (minimum 10 digits including area code)')        
+                raise forms.ValidationError('Please provide a valid landline number (minimum 10 digits including area code), or mobile number')        
         phone_number = ledger_api_client_utils.remove_html_tags(phone_number)
         return phone_number    
     
