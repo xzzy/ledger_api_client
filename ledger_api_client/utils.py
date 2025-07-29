@@ -668,3 +668,41 @@ def remove_html_tags(text):
     text = HTML_TAGS_WRAPPED.sub('', text)
     text = HTML_TAGS_NO_WRAPPED.sub('', text)
     return text
+
+def cancel_invoice(invoice_id):
+    """
+    Cancel an invoice by its ID.
+    """
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/cancel-invoice/'+api_key+'/'
+    myobj = {'invoice_reference': invoice_id}
+    cookies = {}
+    resp = requests.post(url, data=myobj, cookies=cookies)
+    
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:        
+        resp_json = {}
+        print (e)
+        print (resp.text)
+    return resp_json
+    
+def change_user_invoice_ownership(current_email,new_email):
+    """
+    Cancel an invoice by its ID.
+    """
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/change-user-invoice-ownership/'+api_key+'/'
+    myobj = {'current_email': current_email, 'new_email': new_email}
+    cookies = {}
+    resp = requests.post(url, data=myobj, cookies=cookies)
+    
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:
+        print (e)
+        print (resp.text)
+        resp_json = {}
+    return resp_json    
