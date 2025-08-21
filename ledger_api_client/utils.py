@@ -705,4 +705,25 @@ def change_user_invoice_ownership(current_email,new_email):
         print (e)
         print (resp.text)
         resp_json = {}
-    return resp_json    
+    return resp_json
+
+
+def check_oracle_code(oracle_code):
+    """
+    Cancel an invoice by its ID.
+    """
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/check-oracle-code/'+api_key+'/'
+    myobj = {'oracle_code': oracle_code,}
+    cookies = {}
+    resp = requests.post(url, data=myobj, cookies=cookies)
+    
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:
+        print (e)
+        print (resp.text)
+        resp_json = {}
+    return resp_json
+
