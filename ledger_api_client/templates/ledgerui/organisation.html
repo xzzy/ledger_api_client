@@ -112,10 +112,10 @@
 </div>
 <br>
 
-{% if 'residential_line1' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_locality' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_state' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_postcode' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_country' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_line1' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_locality' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_state' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_postcode' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_country' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+{% if 'billingline1' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'billing_locality' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'billing_state' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'billing_postcode' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'billing_country' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_line1' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_locality' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_state' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_postcode' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_country' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
 {% endif %}
 
-{% if 'residential_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+{% if 'billing_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
 <a name="residential-address"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'> 
