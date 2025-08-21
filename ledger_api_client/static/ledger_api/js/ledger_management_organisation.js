@@ -335,22 +335,56 @@ var ledger_management_organisation = {
             $('#input-ledger-ui-postal-address-country').val(ledger_management_organisation.var.organisation_data.data.postal_address.country);                    
 
             var address_status = false;
+            var billing_address_status = false;
+            var postal_address_status = false;
+             
+
+
             if (ledger_management_organisation.var.organisation_data.data.billing_address.line1.length > 2 && 
                 ledger_management_organisation.var.organisation_data.data.billing_address.locality.length > 2 &&
                 ledger_management_organisation.var.organisation_data.data.billing_address.state.length > 1 &&
                 ledger_management_organisation.var.organisation_data.data.billing_address.postcode.length > 1 &&
-                ledger_management_organisation.var.organisation_data.data.billing_address.country.length > 1 &&
+                ledger_management_organisation.var.organisation_data.data.billing_address.country.length > 1) {
 
-                ledger_management_organisation.var.organisation_data.data.postal_address.line1.length > 2 && 
+                    billing_address_status = true;
+
+                }
+
+            if (ledger_management_organisation.var.organisation_data.data.postal_address.line1.length > 2 && 
                 ledger_management_organisation.var.organisation_data.data.postal_address.locality.length > 2 &&
                 ledger_management_organisation.var.organisation_data.data.postal_address.state.length > 1 &&
                 ledger_management_organisation.var.organisation_data.data.postal_address.postcode.length > 1 &&
                 ledger_management_organisation.var.organisation_data.data.postal_address.country.length > 1
 
                )            { 
-                address_status = true;
+                postal_address_status = true;
 
                }
+
+
+            if ('postal_address' in ledger_management_organisation.var.config && 'billing_address' in ledger_management_organisation.var.config) {
+                if (billing_address_status == true && postal_address_status == true) {
+                    address_status = true
+                }
+            } else {
+
+            if ('billing_address' in ledger_management_organisation.var.config) {
+                if (billing_address_status == true) {
+                    address_status = true
+                }
+
+            }
+
+            if ('postal_address' in ledger_management_organisation.var.config) {
+                if (postal_address_status == true) {
+                    address_status = true
+                }
+
+            }
+
+
+            }
+
 
 
             if (address_status == true) { 
@@ -381,8 +415,6 @@ var ledger_management_organisation = {
             //$('#ledger_ui_residential_details').html(ledger_management.var.pagesettings.loader);
             // Postal
             var html = "";
-            console.log("ORG");
-            console.log(ledger_management_organisation.var.config);
 
             if ('billing_address' in ledger_management_organisation.var.config) {
                 html += "<div id='div-ledger-ui-billing-address-loader'>"+ledger_management_organisation.var.pagesettings.loader+"</div>";
