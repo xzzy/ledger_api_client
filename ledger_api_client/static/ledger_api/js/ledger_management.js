@@ -14,20 +14,20 @@ var ledger_management = {
 		        contact: {},
                 is_loading: false,
 		        csrf_token: '',
-                steps:  {step1: {completed: false, loading: false, exec: function() {
-			                ledger_management.init_load_order.step1();
+                steps:  {step1: {completed: false, loading: false, exec: async function() {
+			                await ledger_management.init_load_order.step1();
 			            }}, 
-                 	    step2: {completed: false,  loading: false, exec: function() {
-				            ledger_management.init_load_order.step2();
+                 	    step2: {completed: false,  loading: false, exec: async function() {
+				            await ledger_management.init_load_order.step2();
 				        }}, 
-                        step3: {completed: false, loading: false, exec: function() {
-				            ledger_management.init_load_order.step3();
+                        step3: {completed: false, loading: false, exec: async function() {
+				            await ledger_management.init_load_order.step3();
 				        }},
-                        step4: {completed: false, loading: false, exec: function() {
-                            ledger_management.init_load_order.step4();
+                        step4: {completed: false, loading: false, exec: async function() {
+                            await ledger_management.init_load_order.step4();
                         }},
-                        step5: {completed: false, loading: false, exec: function() {
-                            ledger_management.init_load_order.step5();
+                        step5: {completed: false, loading: false, exec: async function() {
+                            await ledger_management.init_load_order.step5();
                         }},                    
 				},
                 cards: [],
@@ -81,13 +81,13 @@ var ledger_management = {
                 setTimeout("ledger_management.init_begin()",50);
 	     }
         },
-        init_template: function() {
+        init_template: async function() {
                  if ($("#ledger_ui_account_details").length > 0)  {
-                        ledger_management.accounts.init();
+                        await ledger_management.accounts.init();
                  }
 
                  if ($("#ledger_ui_identification_details").length > 0) {
-                        ledger_management.identification.init();
+                        await ledger_management.identification.init();
                  }
 
                  if ($("#ledger_ui_residential_details").length > 0 || $("#ledger_ui_postal_details").length) {
@@ -103,9 +103,7 @@ var ledger_management = {
         },
         init_load_order: {
             step1: function() {
-                 setTimeout("ledger_management.init_template();",40);
-                 
-
+                 setTimeout("ledger_management.init_template();",100);                 
             },
             step2: function() {
                ledger_management.get_settings(); 
@@ -238,6 +236,10 @@ var ledger_management = {
 
                     $('#input-ledger-ui-given-name').html(ledger_management.var.account_data.first_name);
                     $('#input-ledger-ui-last-name').html(ledger_management.var.account_data.last_name);
+                    
+                    $('#input-ledger-ui-legal-given-name').html(ledger_management.var.account_data.legal_first_name);
+                    $('#input-ledger-ui-legal-last-name').html(ledger_management.var.account_data.legal_last_name);
+
                     if ('dob' in ledger_management.var.account_data) {
                        if (ledger_management.var.account_data.dob != null) { 
   		                    var dob_split = ledger_management.var.account_data.dob.split("/"); 
@@ -246,6 +248,17 @@ var ledger_management = {
                     } else {
                        $("#input-ledger-ui-dob").val("");
                     }
+
+                    if ('legal_dob' in ledger_management.var.account_data) {
+                       if (ledger_management.var.account_data.legal_dob != null) { 
+  		                    var dob_split = ledger_management.var.account_data.legal_dob.split("/"); 
+                            $("#input-ledger-ui-legal-dob").html(ledger_management.var.account_data.legal_dob);
+		                }
+                    } else {
+                        $("#input-ledger-ui-dob").html("");
+                        
+                    }
+
                     $('#div-ledger-ui-accounts').show();
                     $('#div-ledger-ui-accounts-loader').hide();
 
@@ -264,7 +277,32 @@ var ledger_management = {
                     } else {
                             $('#div-ledger-ui-dob-name').hide();
                     }       
+                    if (ledger_management.var.config.hasOwnProperty('legal_dob') == true ) {
+                    } else {
+                            $('#div-ledger-ui-legal-dob-name').hide();
+                    }       
+                    if (ledger_management.var.account_data.legal_dob) {
+                        if (ledger_management.var.account_data.legal_dob.length > 0 ) {
+                                $('#div-ledger-ui-dob-name').hide();
+                        } else {
+                            $('#div-ledger-ui-legal-name').hide();
+                        }
+
+                    } else {
+                        $('#div-ledger-ui-legal-dob-name').hide();
+                    }
                     
+                    if (ledger_management.var.account_data.legal_first_name && ledger_management.var.account_data.legal_last_name) {
+                        
+                        if (ledger_management.var.account_data.legal_first_name.length > 1 && ledger_management.var.account_data.legal_last_name.length > 1) {
+
+                        } else {
+                            $('#div-ledger-ui-legal-name').hide();
+                        }
+                    } else {
+                       
+                        $('#div-ledger-ui-legal-name').hide();
+                    }
                     
 
                     if (ledger_management.var.information_status.personal_details_completed == true) { 
@@ -345,7 +383,8 @@ var ledger_management = {
                     html += "         <label for='input-ledger-ui-legal-given-name' class='col-form-label fw-bold'>Given name(s)</label>";
                     html += "       </div>";
                     html += "       <div class='col-5 p-2'> ";
-                    html += "         <input id='input-ledger-ui-legal-given-name' class='form-control' autocomplete='off'>";
+                    html += "         <span id='input-ledger-ui-legal-given-name' class='form-control' style='background-color:#efefef' > <span>";
+                    
                     html += "       </div>";
                     html += "       <div class='col-4  p-2'>";
                     html += "           <span id='moreinfoInline' class='form-text'>";
@@ -357,7 +396,7 @@ var ledger_management = {
                     html += "         <label for='input-ledger-ui-last-name' class='col-form-label fw-bold'>Surname</label>";
                     html += "       </div>";
                     html += "       <div class='col-5 p-2'>";
-                    html += "         <input type='input' id='input-ledger-ui-legal-last-name' class='form-control' autocomplete='off' >";
+                    html += "          <span id='input-ledger-ui-legal-last-name' class='form-control' style='background-color:#efefef' > <span>";
                     html += "       </div>";
                     html += "       <div class='col-4 p-2'>";
                     html += "         <span id='lineInline' class='form-text'>";
@@ -366,6 +405,23 @@ var ledger_management = {
                     html += "   </div>";
                     html += "   </div>";
 
+                
+
+	                html += "<div id='div-ledger-ui-legal-dob-name' >";
+		            html += "   <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>";
+                    html += "       <div class='col-3 text-end p-2'>";
+                    html += "         <label for='inputLine2' class='col-form-label fw-bold'>Legal Date of Birth</label>";
+                    html += "       </div>";
+                    html += "       <div class='col-5 p-2'>";
+                    html += "         <span id='input-ledger-ui-legal-dob' class='form-control' style='background-color:#efefef' > <span>";                    
+                    html += "       </div>";
+                    html += "       <div class='col-4 p-2'>";
+                    html += "         <span id='lineInline' class='form-text'>";
+                    html += "         </span>";
+                    html += "       </div>";
+                    html += "   </div>";
+                    html += "</div>";         
+                    
 	                html += "<div id='div-ledger-ui-dob-name' >";
 		            html += "   <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>";
                     html += "       <div class='col-3 text-end p-2'>";
@@ -378,17 +434,18 @@ var ledger_management = {
                     html += "         <span id='lineInline' class='form-text'>";
                     html += "         </span>";
                     html += "       </div>";
-                    html += "   </div>";
+                    html += "   </div>";   
                     html += "   <div class='d-grid gap-2 d-md-flex justify-content-md-end'> <button class='pull-right btn btn-primary' id='update-account-details'>Update</button></div>";
-                    html += "</div>";
-                    html += "</div>";
+                    html += "</div>";                                     
+                    html += "</div>";                        
                     
                     $('#ledger_ui_account_details').html(html);
                     $('.bs-datepicker').datepicker({"format": "dd/mm/yyyy"});
 
                     $('#update-account-details').click(function() {
-			        ledger_management.accounts.update_data();
-		     });
+			            ledger_management.accounts.update_data();                    
+		            });
+                    // ledger_management.accounts.get_data();
 
 		}
 	},

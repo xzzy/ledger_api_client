@@ -154,8 +154,15 @@ var ledger_management_organisation = {
             var data = {};
             var organisation_name = $('#input-ledger-ui-organisation-name');
             var organisation_abn = $('#input-ledger-ui-organisation-abn');
+            var organisation_trading_name = $('#input-ledger-ui-organisation-trading-name');
+            var organisation_email = $('#input-ledger-ui-organisation-email');
+
             data['organisation_name'] = organisation_name.val();
-            // data['organisation_abn'] = organisation_abn.val();
+            data['organisation_abn'] = organisation_abn.val();
+            data['organisation_trading_name'] = organisation_trading_name.val();
+            data['organisation_email'] = organisation_email.val();
+
+
             console.log(data);            
             ledger_management_organisation.update_organisation_details(data);
             ledger_management_organisation.organisation.get_data_loading();
@@ -164,6 +171,8 @@ var ledger_management_organisation = {
          
             $('#input-ledger-ui-organisation-name').val(ledger_management_organisation.var.organisation_data.data.organisation_name);
             $('#input-ledger-ui-organisation-abn').val(ledger_management_organisation.var.organisation_data.data.organisation_abn);
+            $('#input-ledger-ui-organisation-trading-name').val(ledger_management_organisation.var.organisation_data.data.organisation_trading_name);
+            $('#input-ledger-ui-organisation-email').val(ledger_management_organisation.var.organisation_data.data.organisation_email);
 
             $('#div-ledger-ui-organisation-loader').hide();
             $('#div-ledger-ui-organisation').show();  
@@ -198,11 +207,16 @@ var ledger_management_organisation = {
 
             html += "<div class='row mx-md-n5'>";
             if ('organisation_name' in ledger_management_organisation.var.config) {
+                var edit_organisation_name = "disabled";
+                if (ledger_management_organisation.var.config.organisation_name.options.edit == true) {
+                    edit_organisation_name = "";
+                }
+
                 html += "       <div class='col-3 text-end p-2'>";
                 html += "         <label for='inputLine1' class='col-form-label fw-bold'>Name</label>";
                 html += "       </div>";
                 html += "       <div class='col-5 p-2'> ";
-                html += "         <input type='input' id='input-ledger-ui-organisation-name' class='form-control' autocomplete='off'>";
+                html += "         <input type='input' id='input-ledger-ui-organisation-name' class='form-control' autocomplete='off' "+edit_organisation_name+">";
                 html += "       </div>";
                 html += "       <div class='col-4  p-2'>";
                 html += "           <span id='moreinfoInline' class='form-text'>";
@@ -211,11 +225,16 @@ var ledger_management_organisation = {
                 html += "       </div>";
             }
             if ('organisation_abn' in ledger_management_organisation.var.config) {
+                var edit_organisation_abn = "disabled";
+                if (ledger_management_organisation.var.config.organisation_abn.options.edit == true) {
+                    edit_organisation_abn = "";
+                }
+
                 html += "       <div class='col-3 text-end p-2'>";
                 html += "         <label for='inputLine1' class='col-form-label fw-bold'>ABN</label>";
                 html += "       </div>";
                 html += "       <div class='col-5 p-2'> ";
-                html += "         <input type='input' id='input-ledger-ui-organisation-abn' class='form-control' autocomplete='off' disabled=true>";
+                html += "         <input type='input' id='input-ledger-ui-organisation-abn' class='form-control' autocomplete='off' "+edit_organisation_abn+">";
                 html += "       </div>";
                 html += "       <div class='col-4  p-2'>";
                 html += "           <span id='moreinfoInline' class='form-text'>";
@@ -223,6 +242,42 @@ var ledger_management_organisation = {
                 html += "         </span>";
                 html += "       </div>";
             }
+            if ('organisation_trading_name' in ledger_management_organisation.var.config) {
+                var edit_organisation_trading_name = "disabled";
+                if (ledger_management_organisation.var.config.organisation_trading_name.options.edit == true) {
+                    edit_organisation_trading_name = "";
+                }
+
+                html += "       <div class='col-3 text-end p-2'>";
+                html += "         <label for='inputLine1' class='col-form-label fw-bold'>Trading Name</label>";
+                html += "       </div>";
+                html += "       <div class='col-5 p-2'> ";
+                html += "         <input type='input' id='input-ledger-ui-organisation-trading-name' class='form-control' autocomplete='off' "+edit_organisation_trading_name+">";
+                html += "       </div>";
+                html += "       <div class='col-4  p-2'>";
+                html += "           <span id='moreinfoInline' class='form-text'>";
+                html += "             ";
+                html += "         </span>";
+                html += "       </div>";
+            }            
+            if ('organisation_email' in ledger_management_organisation.var.config) {
+                var edit_organisation_email = "disabled";
+                if (ledger_management_organisation.var.config.organisation_email.options.edit == true) {
+                    edit_organisation_email = "";
+                }
+
+                html += "       <div class='col-3 text-end p-2'>";
+                html += "         <label for='inputLine1' class='col-form-label fw-bold'>Email</label>";
+                html += "       </div>";
+                html += "       <div class='col-5 p-2'> ";
+                html += "         <input type='input' id='input-ledger-ui-organisation-email' class='form-control' autocomplete='off' "+edit_organisation_email+">";
+                html += "       </div>";
+                html += "       <div class='col-4  p-2'>";
+                html += "           <span id='moreinfoInline' class='form-text'>";
+                html += "             ";
+                html += "         </span>";
+                html += "       </div>";
+            }              
 
             html += " <div class='d-grid gap-2 d-md-flex justify-content-md-end'> <button class='pull-right btn btn-primary' id='update-organisation-details'>Update</button></div>";
             html += "</div>";

@@ -387,7 +387,33 @@ def create_organisation(organisation_name, organisation_abn):
 def update_organisation(organisation_id, organisation_name, organisation_abn, organisation_trading_name, organisation_email):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/update_organisation/'+api_key+'/'
-    myobj = {'data': json.dumps({'organisation_id': organisation_id, 'organisation_name': organisation_name, 'organisation_abn': organisation_abn, 'organisation_trading_name': organisation_trading_name, 'organisation_email': organisation_email})}
+    post_data = {'organisation_id': organisation_id, 'organisation_name': organisation_name, 'organisation_abn': organisation_abn, 'organisation_trading_name': organisation_trading_name, 'organisation_email': organisation_email}
+
+    for la in settings.LEDGER_UI_ORGANISATION_MANAGEMENT:
+        field_key = list(la)[0]        
+        if la[field_key]['options']['edit'] is True:       
+            keys_allowed.append(field_key)                
+    if 'organisation_name' not in keys_allowed:
+        del post_data['organisation_name']
+    if 'organisation_abn' not in keys_allowed:
+        del post_data['organisation_abn']        
+    print ("HJH")
+    print (post_data)
+    myobj = {'data': json.dumps(post_data)}
+    keys_allowed = []
+
+
+        
+    # if 'organisation_name' 
+
+    #     {'organisation_name': {'options' : {'view': True, 'edit': True}}},
+    #     {'organisation_abn': {'options' : {'view': True, 'edit': False}}},
+    #     {'organisation_trading_name': {'options' : {'view': True, 'edit': False}}},
+    #     {'organisation_email': {'options' : {'view': True, 'edit': False}}},
+    #     {'billing_address': {'options' : {'view': True, 'edit': True}}},
+    #     {'postal_address': {'options' : {'view': True, 'edit': True}}}
+
+
     resp = requests.post(url, data=myobj)
     resp_json = {}
     try:        
@@ -407,14 +433,26 @@ def update_organisation_obj(org_obj):
     if 'organisation_id' not in org_obj:
         resp_json = {"status" : 404,  "message": "no organisation_id provided"}
         return resp_json
+
+    keys_allowed = []
+    for la in settings.LEDGER_UI_ORGANISATION_MANAGEMENT:
+        field_key = list(la)[0]        
+        if la[field_key]['options']['edit'] is True:       
+            keys_allowed.append(field_key)
+
+    post_org_obj = org_obj.copy()
+    for oo in org_obj:
+           
+        if oo not in keys_allowed and oo != 'organisation_id':
+            del post_org_obj[oo]
         
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/update_organisation/'+api_key+'/'
-    myobj = {'data': json.dumps(org_obj)}
+    myobj = {'data': json.dumps(post_org_obj)}
     resp = requests.post(url, data=myobj)
     resp_json = {}
     try: 
-        resp_json = resp.json()                
+        resp_json = resp.json()   
     except Exception as e:
         print (e)
         resp_json = {}
