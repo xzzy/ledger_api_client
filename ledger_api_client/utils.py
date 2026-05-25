@@ -163,7 +163,7 @@ def create_checkout_session(request, checkout_parameters):
     except Exception as e:
          raise ValidationError('Error: Unable to create basket session - unable to connect to payment gateway')
 
-
+    print (resp.text)
     if int(resp.json()['status']) == 200:
         for c in resp.cookies:
             if c.name ==  'sessionid':
@@ -476,11 +476,8 @@ def get_primary_card_token_for_user(user_id):
     myobj = {'data': json.dumps({'user_id': user_id,})}
     resp = requests.post(url, data=myobj)
     resp_json = {}
-    print (resp)
-    print (resp.text)
     try:
         resp_json = resp.json()
-        print (resp_json)
     except:
         resp_json = {}
     return resp_json

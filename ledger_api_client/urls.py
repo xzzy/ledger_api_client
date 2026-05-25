@@ -17,7 +17,8 @@ urlpatterns = [
         # api
         re_path(r'^ledger-api/get-card-tokens', api.get_card_tokens),
         re_path(r'^ledger-api/delete-card-token/(?P<card_token_id>[0-9]+)/', api.delete_card_token),
-        re_path(r'^ledger-api/process-payment', api.process_payment),
+        re_path(r'^ledger-api/process-payment-hpp', api.process_payment_hpp),
+        re_path(r'^ledger-api/process-payment', api.process_payment),        
         re_path(r'^ledger-api/process-refund', api.process_refund),
         re_path(r'^ledger-api/process-zero', api.process_zero),
         re_path(r'^ledger-api/process-no', api.process_no),
