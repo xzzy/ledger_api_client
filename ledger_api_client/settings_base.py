@@ -82,6 +82,10 @@ AUTH_USER_MODEL = 'ledger_api_client.EmailUserRO'
 # this one prevents the email auth backend from creating EmailUsers with a username param
 USER_FIELDS = ['email']
 
+
+SESSION_COOKIE_NAME="app_sessionid"
+
+
 SESSION_COOKIE_DOMAIN = decouple.config('SESSION_COOKIE_DOMAIN', default=None)
 if SESSION_COOKIE_DOMAIN:
     SESSION_COOKIE_NAME = (SESSION_COOKIE_DOMAIN + ".ledger_sessionid").replace(".", "_")

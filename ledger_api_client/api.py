@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.template.loader import render_to_string, get_template
 from rest_framework.decorators import api_view
 from rest_framework import viewsets, serializers, status, generics, views
@@ -24,6 +24,52 @@ import traceback
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
+
+
+@csrf_exempt
+#@api_view(['POST'])
+def process_payment_hpp(request):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    context = {}
+    cookies = {}
+    #url = settings.LEDGER_API_URL+'/ledger/checkout/checkout/preview/'
+    url = settings.LEDGER_API_URL+'/ledger/checkout/payment-details-hpp/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    api_key = settings.LEDGER_API_KEY
+    payment_session = None
+    basket_hash = ""    
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+          basket_hash = request.session.get('basket_hash')
+          cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
+
+    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id}
+    for post_field in request.POST:
+        if post_field == 'payment-csrfmiddlewaretoken':
+             myobj['csrfmiddlewaretoken'] = request.POST[post_field]
+        else:
+            myobj[post_field] = request.POST[post_field]
+    resp = ""
+    proceed_to_ledger = True
+    if proceed_to_ledger is True:
+        try:
+            resp = requests.post(url, data = myobj, cookies=cookies)
+            json_resp = resp.json()
+            return HttpResponseRedirect(json_resp["hpp_redirect_url"])
+        except Exception as e:
+            print ("Process Payment HPP Exception")
+            print (e)
+            context ={"message": "There was issue attempting to process your payment request.   Connection to the payment gateway failed please try again later"}
+            resp = get_template('payments/payment-details-message.html').render(context)
+    else:
+        pass
+        #resp = "ERROR Attempting to connect payment gateway please try again later"
+    return HttpResponse(resp, content_type='plain/html')
+
+
 
 @csrf_exempt
 #@api_view(['POST'])
@@ -531,6 +577,7 @@ def get_account_details(request, user_id):
     if allow_access is True:
         with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/userid/"+user_id+"/"+settings.LEDGER_API_KEY+"/", data) as url:
               json_response = json.loads(url.read().decode())
+              print (json_response)
         resp["information_status"] = json_response['information_status']
         if 'postal_same_as_residential' not in resp['data']:
             resp['data']['postal_same_as_residential'] = False
