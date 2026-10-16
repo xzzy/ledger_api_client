@@ -14,8 +14,6 @@ from django.core.cache import cache
 from decimal import getcontext
 from django.urls import reverse
 
-from ledger_api_client.ledger_models import Invoice, Basket
-
 def oracle_parser(): 
     pass
 
@@ -770,6 +768,8 @@ def validate_booking_and_invoice_references(booking_reference, invoice_reference
 
     Returns True if an order is shared, otherwise False
     """
+    from ledger_api_client.ledger_models import Invoice, Basket
+    
     baskets = Basket.objects.filter(system=settings.PAYMENT_INTERFACE_SYSTEM_ID).filter(booking_reference=booking_reference).order_by('-date_created')
     invoice = Invoice.objects.filter(reference=invoice_reference).last()
 
