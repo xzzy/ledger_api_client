@@ -112,7 +112,7 @@ class CreateTokenPaymentSession(APIView):
                     checkout_parameters = {
                         "system": json_resp['data']['system'] if 'system' in json_resp['data'] else None,
                         "fallback_url": settings.PAYMENT_INTERFACE_SYSTEM_URL,
-                        "return_url": settings.PAYMENT_INTERFACE_SYSTEM_URL + "/ledger-ui/token-payment-success",
+                        "return_url": json_resp['data']['return_url'] if 'return_url' in json_resp['data'] else None,
                         "return_preload_url": json_resp['data']['return_preload_url'] if 'return_preload_url' in json_resp['data'] else None,
                         "invoice_text": json_resp['data']['invoice_text'] if 'invoice_text' in json_resp['data'] else None,
                         "basket_owner": json_resp['data']['basket_owner'] if 'basket_owner' in json_resp['data'] else None,
